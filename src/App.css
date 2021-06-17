@@ -24,15 +24,26 @@
 }
 
 .chip-white {
+  background-color: ivory;
+}
+.chip-black {
+  background-color: brown;
+}
+.chip {
   position: absolute;
   top: 0;
   left: 25px;
-  /* right: 0; */
-  background-color: ivory;
-
   border-radius: 100%;
   border-color: black;
   border-style: solid;
   width: 55px;
   height: 55px;
+}
+
+.vertical-center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
 }

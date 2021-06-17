@@ -1,1 +1,10 @@
-.Chip {}
+.Chip {
+  position: absolute;
+  top: 0;
+  left: 25px;
+  border-radius: 100%;
+  border-color: black;
+  border-style: solid;
+  width: 55px;
+  height: 55px;
+}
