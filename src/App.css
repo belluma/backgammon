@@ -39,6 +39,10 @@
   width: 55px;
   height: 55px;
 }
+.selected {
+  opacity: 0.5 !important;
+}
+
 .side {
   height: 600px;
   width: 100px;

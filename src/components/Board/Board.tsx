@@ -1,14 +1,21 @@
-import React, { useCallback } from "react";
+import React from "react";
 import styles from "./Board.module.css";
 import Quarter from "../Quarter/Quarter";
 
 type Props = {
   className?: string;
   board: number[][];
+  selectedField: { selected: boolean; id: number };
   selectField: (id: number) => void;
 };
 
 const Board = (props: Props) => {
+  const selectedQuarter: number | undefined = props.selectedField.selected
+    ? Math.floor(props.selectedField.id / 6)
+    : undefined;
+  const selectedField: number | undefined = props.selectedField.selected
+    ? props.selectedField.id % 6
+    : undefined;
   const quarter1: number[][] = props.board.slice(0, 6);
   const quarter2: number[][] = props.board.slice(6, 12);
   const quarter3: number[][] = props.board.slice(12, 18);
@@ -18,15 +25,17 @@ const Board = (props: Props) => {
       quarter={quarter2}
       id={1}
       top={true}
-      key={2}
+      key={1}
       selectField={props.selectField}
+      selectedField={selectedQuarter === 1 ? selectedField : undefined}
     />,
     <Quarter
       quarter={quarter1}
       id={0}
       top={true}
-      key={1}
+      key={0}
       selectField={props.selectField}
+      selectedField={selectedQuarter === 0 ? selectedField : undefined}
     />,
   ];
   const bottom = [
@@ -34,15 +43,17 @@ const Board = (props: Props) => {
       quarter={quarter3}
       id={2}
       top={false}
-      key={3}
+      key={2}
       selectField={props.selectField}
+      selectedField={selectedQuarter === 2 ? selectedField : undefined}
     />,
     <Quarter
       quarter={quarter4}
       id={3}
       top={false}
-      key={4}
+      key={3}
       selectField={props.selectField}
+      selectedField={selectedQuarter === 3 ? selectedField : undefined}
     />,
   ];
 

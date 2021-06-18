@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import styles from "./Quarter.module.css";
 import Field from "../Field/Field";
 
@@ -6,6 +6,7 @@ type Props = {
   top: boolean;
   quarter: number[][];
   id: number;
+  selectedField?: number | undefined;
   selectField: (id: number) => void;
   className?: string;
 };
@@ -24,14 +25,14 @@ const Quarter = (props: Props) => {
         key={i}
         className={classes}
         selectField={() => props.selectField(props.id * 6 + i)}
+        selected={props.selectedField === i ? true : false}
       />
     );
     if (props.top) quarter.unshift(f);
     else quarter.push(f);
   }
-  console.log(props.id);
   if (props.id % 3 !== 0)
-    quarter.push(<div className="verticalBarSmall">fdsadf</div>);
+    quarter.push(<div className="verticalBarSmall" key={6}></div>);
 
   return (
     <div className={styles.Quarter} data-testid="Quarter">
