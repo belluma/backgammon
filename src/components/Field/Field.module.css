@@ -6,7 +6,7 @@
   padding: 0px;
   margin: 0;
   box-sizing: border-box;
-  margin: auto;
+  float: left;
   position: relative;
   display: inline-block;
 }

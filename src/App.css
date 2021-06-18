@@ -19,8 +19,8 @@
   border-bottom-color: darkred;
 }
 .black {
-  border-bottom-color: black;
-  border-top-color: black;
+  border-bottom-color: rgb(39, 23, 4);
+  border-top-color: rgb(39, 23, 4);
 }
 
 .chip-white {
@@ -39,11 +39,34 @@
   width: 55px;
   height: 55px;
 }
+.side {
+  height: 600px;
+  width: 100px;
+  background-color: burlywood;
+  position: relative;
+  display: inline-block;
+}
 
-.vertical-center {
+.vertical-align {
   margin: 0;
   position: absolute;
   top: 50%;
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
+}
+.verticalBarSmall {
+  display: inline-block;
+  width: 60px;
+  height: 300px;
+  background-color: black;
+}
+
+.board {
+  /* position: relative; */
+  display: block;
+  width: max-content;
+  height: max-content;
+  border: solid;
+  border-width: 12px;
+  font-size: 0;
 }
