@@ -6,6 +6,7 @@ type Props = {
   className?: string;
   board: number[][];
   selectedField: { selected: boolean; id: number };
+  kickedChips: number[];
   selectField: (id: number) => void;
 };
 
@@ -36,6 +37,7 @@ const Board = (props: Props) => {
       key={0}
       selectField={props.selectField}
       selectedField={selectedQuarter === 0 ? selectedField : undefined}
+      kickedChips={props.kickedChips[1]}
     />,
   ];
   const bottom = [
@@ -54,6 +56,7 @@ const Board = (props: Props) => {
       key={3}
       selectField={props.selectField}
       selectedField={selectedQuarter === 3 ? selectedField : undefined}
+      kickedChips={props.kickedChips[0]}
     />,
   ];
 

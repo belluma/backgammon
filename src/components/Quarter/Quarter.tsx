@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./Quarter.module.css";
 import Field from "../Field/Field";
+import Edge from "../Edge/Edge";
 
 type Props = {
   top: boolean;
@@ -9,6 +10,7 @@ type Props = {
   selectedField?: number | undefined;
   selectField: (id: number) => void;
   className?: string;
+  kickedChips?: number;
 };
 
 const Quarter = (props: Props) => {
@@ -32,7 +34,7 @@ const Quarter = (props: Props) => {
     else quarter.push(f);
   }
   if (props.id % 3 !== 0)
-    quarter.push(<div className="verticalBarSmall" key={6}></div>);
+    quarter.push(<Edge top={props.top} chips={props.kickedChips} />);
 
   return (
     <div className={styles.Quarter} data-testid="Quarter">

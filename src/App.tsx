@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import "./App.css";
 import Board from "./components/Board/Board";
 import Dice from "./components/Dice/Dice";
+
+//initial setup of the board
 let board: number[][] = [...Array(24)].map((a) => (a = [0, 0]));
 const chips = [
   { pos: 0, amount: 2 },
@@ -10,7 +12,6 @@ const chips = [
   { pos: 18, amount: 5 },
 ];
 chips.map((a) => {
-  console.log(123);
   board[a.pos][0] = a.amount;
   board[board.length - 1 - a.pos][1] = a.amount;
 });
@@ -19,9 +20,14 @@ function App() {
   const rollDie = () => {
     return Math.floor(Math.random() * 6) + 1;
   };
-  const [turn, setTurn] = useState({
+  const [game, setGame] = useState({
     activePlayer: 0,
+    enemyPlayer: 1,
     round: 0,
+    board: board,
+    diceRoll: [0],
+    diceLeft: [0],
+    kickedChips: [0, 0],
   });
   const [dice, setDice] = useState({
     dieOne: 1,
@@ -32,21 +38,27 @@ function App() {
     setDice({ ...dice, dieOne: rollDie(), dieTwo: rollDie() });
   };
 
-  //initial setup of the board
-
-  const [game, setGame] = useState({ board: board });
   //before gamestart
   const rollDiceToDetermineStartingPlayer = () => {
-    if (turn.round === 0) {
+    if (game.round === 0) {
       if (dice.dieOne === dice.dieTwo) rollDice();
       else
-        setTurn({
-          ...turn,
+        setGame({
+          ...game,
           activePlayer: dice.dieOne > dice.dieTwo ? 0 : 1,
-          round: turn.round + 1,
+          enemyPlayer: dice.dieOne > dice.dieTwo ? 1 : 0,
+          round: game.round + 1,
         });
     }
   };
+  // //swap active player when moves made
+  // if (game.diceLeft.length === 0)
+  //   setGame({
+  //     ...game,
+  //     activePlayer: game.enemyPlayer,
+  //     enemyPlayer: game.activePlayer,
+  //   });
+
   //each round
   const saveDicerollInArrayToKeepTrackOfMovements = () => {
     return dice.dieOne === dice.dieTwo
@@ -54,10 +66,10 @@ function App() {
       : [dice.dieOne, dice.dieTwo];
   };
   const fieldIsFree = (field: number): boolean => {
-    return board[field][turn.activePlayer * -1 + 1] <= 1;
+    return board[field][game.enemyPlayer] <= 1;
   };
   const getTargetPosition = (startField: number, diceRoll: number): number => {
-    return turn.activePlayer === 0
+    return game.activePlayer === 0
       ? startField + diceRoll
       : startField - diceRoll;
   };
@@ -72,10 +84,22 @@ function App() {
   const addChipToField = (field: number, player: number): void => {
     board[field][player]++;
   };
-  const takeEnemyStone = (field: number): void => {
-    board[field][turn.activePlayer * -1 + 1]--;
+  const addKickedChip = (): number[] => {
+    let chips = [...game.kickedChips];
+    chips[game.enemyPlayer]++;
+    return chips;
   };
-
+  const takeEnemyStone = (field: number): void => {
+    board[field][game.enemyPlayer]--;
+    console.log(addKickedChip());
+    setGame({ ...game, kickedChips: addKickedChip() });
+  };
+  console.log(game.kickedChips);
+  const allChipsInHomeQuarter = (): boolean => {
+    const notHome =
+      game.activePlayer === 0 ? game.board.slice(0, 18) : game.board.slice(6);
+    return notHome.reduce((a, b) => a + b[game.activePlayer], 0) === 0;
+  };
   const getPossibleMoves = (
     diceRoll: number[],
     freeFields: number[] = [],
@@ -103,50 +127,75 @@ function App() {
     }
     return f;
   };
+  const diceNotUsedYet = (diceRoll: number[], steps: number): number[] => {
+    let start, end;
+    if (diceRoll.indexOf(steps) === -1) {
+      start = 0;
+      if (diceRoll.length === 2) {
+        end = 0;
+      } else end = 4 - steps / diceRoll[0];
+    } else {
+      start = diceRoll.indexOf(steps) === 0 ? 1 : 0;
+      end = start === 0 ? 1 : 4;
+    }
+    return game.diceLeft.slice(start, end);
+  };
   //one round
-  // let selectedChip: number | undefined = undefined;
-  let diceRoll = saveDicerollInArrayToKeepTrackOfMovements();
+  // let diceRoll = saveDicerollInArrayToKeepTrackOfMovements();
+  // set;
   const selectField = (fieldId: number) => {
-    console.log(selectedChip, diceRoll);
+    console.log(selectedChip, game.diceLeft);
     if (
       !selectedChip.selected &&
-      hasChipsOnField(fieldId, turn.activePlayer) &&
-      getPossibleMoves(diceRoll, [], 0, fieldId).length > 0
+      hasChipsOnField(fieldId, game.activePlayer) &&
+      getPossibleMoves(game.diceLeft, [], 0, fieldId).length > 0
     ) {
-      console.log(123123);
       setSelectedChip({ ...selectedChip, selected: true, id: fieldId });
     }
     if (
       selectedChip.selected &&
-      getPossibleMoves(diceRoll).indexOf(fieldId) > -1
+      getPossibleMoves(game.diceLeft).indexOf(fieldId) > -1
     ) {
-      if (hasChipsOnField(fieldId, turn.activePlayer * -1 + 1))
-        takeEnemyStone(fieldId);
-      removeChipFromField(selectedChip.id, turn.activePlayer);
-      addChipToField(fieldId, turn.activePlayer);
+      if (hasChipsOnField(fieldId, game.enemyPlayer)) takeEnemyStone(fieldId);
+      removeChipFromField(selectedChip.id, game.activePlayer);
+      addChipToField(fieldId, game.activePlayer);
       setSelectedChip({ ...selectedChip, selected: false });
-      setGame({ ...game, board: board });
-      console.log(getPossibleMoves(diceRoll));
-      // else {
-      //   console.log(selectedChip, fieldId);
-      //   board[selectedChip][turn.activePlayer]--;
-      //   board[fieldId][turn.activePlayer]++;
-      //   selectedChip = undefined;
-      //   setSelectedField(0);
-      //   setGame({ ...game, board: board });
-      //   // console.l;
-      // }
-      // console.log(diceRoll);
-      // console.log(getPossibleMoves(diceRoll));
+      setGame({
+        ...game,
+        board: board,
+        diceLeft: diceNotUsedYet(
+          game.diceLeft,
+          Math.abs(fieldId - selectedChip.id)
+        ),
+      });
+      console.log(
+        diceNotUsedYet(game.diceLeft, Math.abs(fieldId - selectedChip.id))
+      );
+      if (
+        diceNotUsedYet(game.diceLeft, Math.abs(fieldId - selectedChip.id))
+          .length === 0
+      ) {
+        rollDice();
+        setGame({
+          ...game,
+          activePlayer: game.enemyPlayer,
+          enemyPlayer: game.activePlayer,
+        });
+      }
     }
   };
 
   useEffect(() => {
     rollDiceToDetermineStartingPlayer();
+    setGame({
+      ...game,
+      diceLeft: saveDicerollInArrayToKeepTrackOfMovements(),
+      diceRoll: saveDicerollInArrayToKeepTrackOfMovements(),
+    });
   }, [dice]);
 
-  if (turn.round === 1)
-    console.log(`'Player ${turn.activePlayer}  starts the game`);
+  if (game.round === 1)
+    console.log(`'Player ${game.activePlayer}  starts the game`);
 
   let rolledDice = [
     <Dice num={dice.dieOne} key={0} />,
@@ -154,13 +203,14 @@ function App() {
   ];
   return (
     <section>
-      <h1>It's your turn Player {turn.activePlayer}</h1>
+      <h1>It's your game Player {game.activePlayer}</h1>
       <section className={"board"}>
         <section style={{ display: "inline-block" }}>
           <Board
             board={game.board}
             selectField={selectField}
             selectedField={selectedChip}
+            kickedChips={game.kickedChips}
           />
         </section>
         <section className="side">

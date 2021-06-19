@@ -1,0 +1,12 @@
+.Edge {
+  width: 100px;
+  height: 300px;
+  background-color: black;
+  border: none;
+  padding: 0px;
+  margin: 0;
+  box-sizing: border-box;
+  float: left;
+  position: relative;
+  display: inline-block;
+}
