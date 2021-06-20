@@ -25,10 +25,8 @@ function App() {
     activePlayer: 0,
     enemyPlayer: 1,
     round: 0,
-    // board: board,
     diceRoll: [0],
     diceLeft: [0],
-    // kickedChips: [0, 0],
   });
   const [dice, setDice] = useState({
     dieOne: 1,
@@ -98,15 +96,27 @@ function App() {
   const getMovesForNonDoubleRoll = (
     selectedField: number,
     diceRoll: number[]
-  ) => {
-    const f = [];
+  ): number[] => {
+    const freeFields = [];
     let target = getTargetPosition(selectedField, diceRoll[0]);
-    if (isOnBoard(target) && fieldIsFree(target)) f.push(target);
+    if (isOnBoard(target) && fieldIsFree(target)) freeFields.push(target);
     target = getTargetPosition(selectedField, diceRoll[1]);
-    if (isOnBoard(target) && fieldIsFree(target)) f.push(target);
+    if (isOnBoard(target) && fieldIsFree(target)) freeFields.push(target);
     target = getTargetPosition(selectedField, diceRoll[0] + diceRoll[1]);
-    if (f.length && isOnBoard(target) && fieldIsFree(target)) f.push(target);
-    return f;
+    if (freeFields.length && isOnBoard(target) && fieldIsFree(target))
+      freeFields.push(target);
+    return freeFields;
+  };
+  const getMovesWhenChipsOut = (diceRoll: number[]): number[] => {
+    const freeFields: number[] = [];
+    game.activePlayer === 0
+      ? diceRoll.forEach((a) => {
+          if (fieldIsFree(a - 1)) freeFields.push(a - 1);
+        })
+      : diceRoll.forEach((a) => {
+          if (fieldIsFree(24 - a)) freeFields.push(24 - a);
+        });
+    return freeFields;
   };
   const getPossibleMoves = (
     diceRoll: number[],
@@ -118,14 +128,7 @@ function App() {
     if (index === diceRoll.length) return freeFields;
     let f = freeFields;
     if (hasChipsKickedOut()) {
-      game.activePlayer === 0
-        ? diceRoll.forEach((a) => {
-            if (fieldIsFree(a - 1)) f.push(a - 1);
-          })
-        : diceRoll.forEach((a) => {
-            if (fieldIsFree(24 - a)) f.push(24 - a);
-          });
-      return f;
+      return getMovesWhenChipsOut(diceRoll);
     }
     if (diceRoll.length === 4) {
       const target = getTargetPosition(selectedField, diceRoll[index]);
@@ -140,13 +143,23 @@ function App() {
     }
     return f;
   };
+  const noMovesPossible = () => {
+    for (let i = 0; i < board.length; i++) {
+      if (getPossibleMoves(game.diceLeft, [], 0, i).length > 0) return false;
+    }
+    return true;
+  };
   const diceNotUsedYet = (diceRoll: number[], steps: number): number[] => {
     let start, end;
     if (diceRoll.indexOf(steps) === -1) {
       start = 0;
       if (diceRoll.length === 2) {
         end = 0;
-      } else end = 4 - steps / diceRoll[0];
+      } else {
+        end = diceRoll.length - steps / diceRoll[0];
+        console.log(end);
+        console.log(game.diceLeft.slice(start, end));
+      }
     } else {
       start = diceRoll.indexOf(steps) === 0 ? 1 : 0;
       end = start === 0 ? 1 : 4;
@@ -155,6 +168,7 @@ function App() {
   };
 
   const selectChipWhenNoneSelected = (fieldId: number): void => {
+    if (noMovesPossible()) endRound();
     if (
       !hasChipsKickedOut() &&
       !selectedChip.selected &&
