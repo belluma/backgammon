@@ -14,9 +14,13 @@ const Field: React.FC<Props> & React.HTMLAttributes<HTMLDivElement> = (
   props
 ) => {
   const chips = [];
-  for (let i = 0; i < props.chips[0]; i++) {
-    const classNames = ["chip", "chip-white"];
-    if (props.selected && i === props.chips[0] - 1) classNames.push("selected");
+  const amount = props.chips.reduce((a, b) => a + b);
+  for (let i = 0; i < amount; i++) {
+    const classNames = ["chip"];
+    props.chips[0] > 0
+      ? classNames.push("chip-white")
+      : classNames.push("chip-black");
+    if (props.selected && i === amount - 1) classNames.push("selected");
     chips.push(
       <Chip
         top={props.top}
@@ -26,18 +30,31 @@ const Field: React.FC<Props> & React.HTMLAttributes<HTMLDivElement> = (
       />
     );
   }
-  for (let i = 0; i < props.chips[1]; i++) {
-    const classNames = ["chip", "chip-black"];
-    if (props.selected && i === props.chips[1] - 1) classNames.push("selected");
-    chips.push(
-      <Chip
-        top={props.top}
-        position={i}
-        className={classNames.join(" ")}
-        key={i}
-      />
-    );
-  }
+
+  // for (let i = 0; i < props.chips[0]; i++) {
+  //   const classNames = ["chip", "chip-white"];
+  //   if (props.selected && i === props.chips[0] - 1) classNames.push("selected");
+  //   chips.push(
+  //     <Chip
+  //       top={props.top}
+  //       position={i}
+  //       className={classNames.join(" ")}
+  //       key={i}
+  //     />
+  //   );
+  // }
+  // for (let i = 0; i < props.chips[1]; i++) {
+  //   const classNames = ["chip", "chip-black"];
+  //   if (props.selected && i === props.chips[1] - 1) classNames.push("selected");
+  //   chips.push(
+  //     <Chip
+  //       top={props.top}
+  //       position={i}
+  //       className={classNames.join(" ")}
+  //       key={i}
+  //     />
+  //   );
+  // }
   return (
     <section
       className={styles.Field}

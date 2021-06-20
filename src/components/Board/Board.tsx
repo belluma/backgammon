@@ -29,6 +29,7 @@ const Board = (props: Props) => {
       key={1}
       selectField={props.selectField}
       selectedField={selectedQuarter === 1 ? selectedField : undefined}
+      kickedChips={props.kickedChips[1]}
     />,
     <Quarter
       quarter={quarter1}
@@ -37,7 +38,6 @@ const Board = (props: Props) => {
       key={0}
       selectField={props.selectField}
       selectedField={selectedQuarter === 0 ? selectedField : undefined}
-      kickedChips={props.kickedChips[1]}
     />,
   ];
   const bottom = [
@@ -48,6 +48,7 @@ const Board = (props: Props) => {
       key={2}
       selectField={props.selectField}
       selectedField={selectedQuarter === 2 ? selectedField : undefined}
+      kickedChips={props.kickedChips[0]}
     />,
     <Quarter
       quarter={quarter4}
@@ -56,7 +57,6 @@ const Board = (props: Props) => {
       key={3}
       selectField={props.selectField}
       selectedField={selectedQuarter === 3 ? selectedField : undefined}
-      kickedChips={props.kickedChips[0]}
     />,
   ];
 

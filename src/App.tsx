@@ -5,6 +5,7 @@ import Dice from "./components/Dice/Dice";
 
 //initial setup of the board
 let board: number[][] = [...Array(24)].map((a) => (a = [0, 0]));
+let kickedChips = [0, 0];
 const chips = [
   { pos: 0, amount: 2 },
   { pos: 11, amount: 5 },
@@ -24,10 +25,10 @@ function App() {
     activePlayer: 0,
     enemyPlayer: 1,
     round: 0,
-    board: board,
+    // board: board,
     diceRoll: [0],
     diceLeft: [0],
-    kickedChips: [0, 0],
+    // kickedChips: [0, 0],
   });
   const [dice, setDice] = useState({
     dieOne: 1,
@@ -48,16 +49,11 @@ function App() {
           activePlayer: dice.dieOne > dice.dieTwo ? 0 : 1,
           enemyPlayer: dice.dieOne > dice.dieTwo ? 1 : 0,
           round: game.round + 1,
+          diceLeft: saveDicerollInArrayToKeepTrackOfMovements(),
+          diceRoll: saveDicerollInArrayToKeepTrackOfMovements(),
         });
     }
   };
-  // //swap active player when moves made
-  // if (game.diceLeft.length === 0)
-  //   setGame({
-  //     ...game,
-  //     activePlayer: game.enemyPlayer,
-  //     enemyPlayer: game.activePlayer,
-  //   });
 
   //each round
   const saveDicerollInArrayToKeepTrackOfMovements = () => {
@@ -76,7 +72,9 @@ function App() {
   const isOnBoard = (field: number): boolean => field >= 0 && field < 24;
 
   const hasChipsOnField = (field: number, player: number): boolean =>
-    game.board[field][player] > 0;
+    board[field][player] > 0;
+
+  const hasChipsKickedOut = (): boolean => kickedChips[game.activePlayer] > 0;
 
   const removeChipFromField = (field: number, player: number): void => {
     board[field][player]--;
@@ -84,21 +82,31 @@ function App() {
   const addChipToField = (field: number, player: number): void => {
     board[field][player]++;
   };
-  const addKickedChip = (): number[] => {
-    let chips = [...game.kickedChips];
-    chips[game.enemyPlayer]++;
-    return chips;
+  const returnOnBoard = (): void => {
+    kickedChips[game.activePlayer]--;
   };
+
   const takeEnemyStone = (field: number): void => {
     board[field][game.enemyPlayer]--;
-    console.log(addKickedChip());
-    setGame({ ...game, kickedChips: addKickedChip() });
+    kickedChips[game.enemyPlayer]++;
   };
-  console.log(game.kickedChips);
   const allChipsInHomeQuarter = (): boolean => {
     const notHome =
-      game.activePlayer === 0 ? game.board.slice(0, 18) : game.board.slice(6);
+      game.activePlayer === 0 ? board.slice(0, 18) : board.slice(6);
     return notHome.reduce((a, b) => a + b[game.activePlayer], 0) === 0;
+  };
+  const getMovesForNonDoubleRoll = (
+    selectedField: number,
+    diceRoll: number[]
+  ) => {
+    const f = [];
+    let target = getTargetPosition(selectedField, diceRoll[0]);
+    if (isOnBoard(target) && fieldIsFree(target)) f.push(target);
+    target = getTargetPosition(selectedField, diceRoll[1]);
+    if (isOnBoard(target) && fieldIsFree(target)) f.push(target);
+    target = getTargetPosition(selectedField, diceRoll[0] + diceRoll[1]);
+    if (f.length && isOnBoard(target) && fieldIsFree(target)) f.push(target);
+    return f;
   };
   const getPossibleMoves = (
     diceRoll: number[],
@@ -109,6 +117,16 @@ function App() {
     if (selectedField === undefined) return [];
     if (index === diceRoll.length) return freeFields;
     let f = freeFields;
+    if (hasChipsKickedOut()) {
+      game.activePlayer === 0
+        ? diceRoll.forEach((a) => {
+            if (fieldIsFree(a - 1)) f.push(a - 1);
+          })
+        : diceRoll.forEach((a) => {
+            if (fieldIsFree(24 - a)) f.push(24 - a);
+          });
+      return f;
+    }
     if (diceRoll.length === 4) {
       const target = getTargetPosition(selectedField, diceRoll[index]);
       if (isOnBoard(target)) {
@@ -118,12 +136,7 @@ function App() {
         }
       }
     } else {
-      let target = getTargetPosition(selectedField, diceRoll[0]);
-      if (isOnBoard(target) && fieldIsFree(target)) f.push(target);
-      target = getTargetPosition(selectedField, diceRoll[1]);
-      if (isOnBoard(target) && fieldIsFree(target)) f.push(target);
-      target = getTargetPosition(selectedField, diceRoll[0] + diceRoll[1]);
-      if (f.length && isOnBoard(target) && fieldIsFree(target)) f.push(target);
+      return getMovesForNonDoubleRoll(selectedField, diceRoll);
     }
     return f;
   };
@@ -140,58 +153,71 @@ function App() {
     }
     return game.diceLeft.slice(start, end);
   };
-  //one round
-  // let diceRoll = saveDicerollInArrayToKeepTrackOfMovements();
-  // set;
-  const selectField = (fieldId: number) => {
-    console.log(selectedChip, game.diceLeft);
+
+  const selectChipWhenNoneSelected = (fieldId: number): void => {
     if (
+      !hasChipsKickedOut() &&
       !selectedChip.selected &&
       hasChipsOnField(fieldId, game.activePlayer) &&
       getPossibleMoves(game.diceLeft, [], 0, fieldId).length > 0
     ) {
       setSelectedChip({ ...selectedChip, selected: true, id: fieldId });
     }
+  };
+  const unselectChip = (fieldId: number): void => {
+    if (selectedChip.id === fieldId && selectedChip.selected)
+      setSelectedChip({ ...selectedChip, selected: false });
+  };
+  const endRound = (): void => {
+    rollDice();
+    setGame({
+      ...game,
+      activePlayer: game.enemyPlayer,
+      enemyPlayer: game.activePlayer,
+      round: game.round + 1,
+    });
+  };
+
+  const selectField = (fieldId: number) => {
+    let kicked;
+
+    selectChipWhenNoneSelected(fieldId);
+    unselectChip(fieldId);
     if (
-      selectedChip.selected &&
+      (selectedChip.selected || hasChipsKickedOut()) &&
       getPossibleMoves(game.diceLeft).indexOf(fieldId) > -1
     ) {
+      if (hasChipsKickedOut()) {
+        console.log(getPossibleMoves(game.diceLeft));
+        kicked = true;
+        returnOnBoard();
+      } else {
+        removeChipFromField(selectedChip.id, game.activePlayer);
+      }
       if (hasChipsOnField(fieldId, game.enemyPlayer)) takeEnemyStone(fieldId);
-      removeChipFromField(selectedChip.id, game.activePlayer);
       addChipToField(fieldId, game.activePlayer);
       setSelectedChip({ ...selectedChip, selected: false });
+      const usedDie = !kicked
+        ? Math.abs(fieldId - selectedChip.id)
+        : game.activePlayer === 0
+        ? fieldId + 1
+        : 24 - fieldId;
+      console.log(usedDie);
+      const unusedDice = diceNotUsedYet(game.diceLeft, usedDie);
       setGame({
         ...game,
-        board: board,
-        diceLeft: diceNotUsedYet(
-          game.diceLeft,
-          Math.abs(fieldId - selectedChip.id)
-        ),
+        diceLeft: unusedDice,
       });
-      console.log(
-        diceNotUsedYet(game.diceLeft, Math.abs(fieldId - selectedChip.id))
-      );
-      if (
-        diceNotUsedYet(game.diceLeft, Math.abs(fieldId - selectedChip.id))
-          .length === 0
-      ) {
-        rollDice();
-        setGame({
-          ...game,
-          activePlayer: game.enemyPlayer,
-          enemyPlayer: game.activePlayer,
-        });
+      if (unusedDice.length === 0) {
+        endRound();
       }
     }
   };
 
   useEffect(() => {
     rollDiceToDetermineStartingPlayer();
-    setGame({
-      ...game,
-      diceLeft: saveDicerollInArrayToKeepTrackOfMovements(),
-      diceRoll: saveDicerollInArrayToKeepTrackOfMovements(),
-    });
+    const diceRoll = saveDicerollInArrayToKeepTrackOfMovements();
+    setGame({ ...game, diceLeft: diceRoll, diceRoll: diceRoll });
   }, [dice]);
 
   if (game.round === 1)
@@ -207,10 +233,10 @@ function App() {
       <section className={"board"}>
         <section style={{ display: "inline-block" }}>
           <Board
-            board={game.board}
+            board={board}
             selectField={selectField}
             selectedField={selectedChip}
-            kickedChips={game.kickedChips}
+            kickedChips={kickedChips}
           />
         </section>
         <section className="side">

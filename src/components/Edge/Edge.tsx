@@ -11,7 +11,7 @@ const Edge = (props: Props) => {
   const chips = [];
   const classNames = props.top
     ? ["chip", "chip-black"]
-    : ["chips", "chip-white"];
+    : ["chip", "chip-white"];
   if (props.chips !== undefined)
     for (let i = 0; i < props.chips; i++) {
       chips.push(
@@ -23,7 +23,7 @@ const Edge = (props: Props) => {
         />
       );
     }
-  return <div className={styles.Edge}>Edge Component</div>;
+  return <div className={styles.Edge}>{chips}</div>;
 };
 
 export default Edge;
