@@ -12,11 +12,17 @@ const chips = [
   { pos: 16, amount: 3 },
   { pos: 18, amount: 5 },
 ];
-chips.map((a) => {
-  board[a.pos][0] = a.amount;
-  board[board.length - 1 - a.pos][1] = a.amount;
-});
+const setupBoard = () => {
+  board.forEach((field, i) => {
+    field[0] = field[1] = 0;
 
+    chips.forEach((a) => {
+      if (i === a.pos) field[0] = a.amount;
+      else if (23 - i === a.pos) field[1] = a.amount;
+    });
+  });
+};
+setupBoard();
 function App() {
   const rollDie = () => {
     return Math.floor(Math.random() * 6) + 1;
@@ -47,8 +53,8 @@ function App() {
           activePlayer: dice.dieOne > dice.dieTwo ? 0 : 1,
           enemyPlayer: dice.dieOne > dice.dieTwo ? 1 : 0,
           round: game.round + 1,
-          // diceLeft: saveDicerollInArrayToKeepTrackOfMovements(),
-          // diceRoll: saveDicerollInArrayToKeepTrackOfMovements(),
+          diceLeft: saveDicerollInArrayToKeepTrackOfMovements(),
+          diceRoll: saveDicerollInArrayToKeepTrackOfMovements(),
         });
     }
   };
@@ -94,6 +100,14 @@ function App() {
       game.activePlayer === 0 ? board.slice(0, 18) : board.slice(6);
     if (kickedChips[game.activePlayer] > 0) return false;
     return notHome.reduce((a, b) => a + b[game.activePlayer], 0) === 0;
+  };
+  const allChipsJumpedOut = (): boolean =>
+    board.reduce((a, b) => a + b[game.activePlayer], 0) === 0 &&
+    !hasChipsKickedOut();
+  const endGame = (): void => {
+    setupBoard();
+    alert(`Player ${game.activePlayer} won the game`);
+    setGame({ ...game, round: 0 });
   };
   const isOnBoard = (field: number): boolean => {
     return allChipsInHomeQuarter()
@@ -152,6 +166,7 @@ function App() {
       : diceRoll.forEach((a) => {
           if (fieldIsFree(24 - a)) freeFields.push(24 - a);
         });
+    console.log(freeFields);
     return freeFields;
   };
   const getPossibleMoves = (
@@ -226,6 +241,7 @@ function App() {
       diceLeft: unusedDice,
     });
     setSelectedChip({ ...selectedChip, selected: false });
+    if (allChipsJumpedOut()) endGame();
     if (unusedDice.length === 0) {
       endRound();
     }
@@ -290,11 +306,12 @@ function App() {
   useEffect(() => {
     rollDiceToDetermineStartingPlayer();
     const diceRoll = saveDicerollInArrayToKeepTrackOfMovements();
-    setGame({
-      ...game,
-      diceLeft: diceRoll,
-      diceRoll: diceRoll,
-    });
+    if (game.round > 0)
+      setGame({
+        ...game,
+        diceLeft: diceRoll,
+        diceRoll: diceRoll,
+      });
   }, [dice]);
 
   if (game.round === 1)
