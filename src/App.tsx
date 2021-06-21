@@ -47,8 +47,8 @@ function App() {
           activePlayer: dice.dieOne > dice.dieTwo ? 0 : 1,
           enemyPlayer: dice.dieOne > dice.dieTwo ? 1 : 0,
           round: game.round + 1,
-          diceLeft: saveDicerollInArrayToKeepTrackOfMovements(),
-          diceRoll: saveDicerollInArrayToKeepTrackOfMovements(),
+          // diceLeft: saveDicerollInArrayToKeepTrackOfMovements(),
+          // diceRoll: saveDicerollInArrayToKeepTrackOfMovements(),
         });
     }
   };
@@ -60,14 +60,15 @@ function App() {
       : [dice.dieOne, dice.dieTwo];
   };
   const fieldIsFree = (field: number): boolean => {
-    return board[field][game.enemyPlayer] <= 1;
+    return field === -1 || field === 24
+      ? true
+      : board[field][game.enemyPlayer] <= 1;
   };
   const getTargetPosition = (startField: number, diceRoll: number): number => {
     return game.activePlayer === 0
       ? startField + diceRoll
       : startField - diceRoll;
   };
-  const isOnBoard = (field: number): boolean => field >= 0 && field < 24;
 
   const hasChipsOnField = (field: number, player: number): boolean =>
     board[field][player] > 0;
@@ -91,7 +92,37 @@ function App() {
   const allChipsInHomeQuarter = (): boolean => {
     const notHome =
       game.activePlayer === 0 ? board.slice(0, 18) : board.slice(6);
+    if (kickedChips[game.activePlayer] > 0) return false;
     return notHome.reduce((a, b) => a + b[game.activePlayer], 0) === 0;
+  };
+  const isOnBoard = (field: number): boolean => {
+    return allChipsInHomeQuarter()
+      ? field >= -1 && field <= 24
+      : field >= 0 && field < 24;
+  };
+
+  const noChipsBehindInHomeField = (fieldId: number) => {
+    return game.activePlayer === 0
+      ? board
+          .slice(18, fieldId)
+          .reduce((a, b) => a + b[game.activePlayer], 0) === 0
+      : board
+          .slice(fieldId + 1, 6)
+          .reduce((a, b) => a + b[game.activePlayer], 0) === 0;
+  };
+  const takeChipOutOfGame = (fieldId: number, player = game.activePlayer) => {
+    const distance = player === 0 ? 24 - fieldId : fieldId + 1;
+    console.log(distance);
+    for (let i = 0; i < game.diceLeft.length; i++) {
+      if (
+        distance === game.diceLeft[i] ||
+        (distance < game.diceLeft[i] && noChipsBehindInHomeField(fieldId))
+      ) {
+        console.log(fieldId, player);
+        removeChipFromField(fieldId, player);
+        return game.diceLeft[i];
+      }
+    }
   };
   const getMovesForNonDoubleRoll = (
     selectedField: number,
@@ -99,11 +130,16 @@ function App() {
   ): number[] => {
     const freeFields = [];
     let target = getTargetPosition(selectedField, diceRoll[0]);
-    if (isOnBoard(target) && fieldIsFree(target)) freeFields.push(target);
+    if ((isOnBoard(target) && fieldIsFree(target)) || allChipsInHomeQuarter())
+      freeFields.push(target);
     target = getTargetPosition(selectedField, diceRoll[1]);
-    if (isOnBoard(target) && fieldIsFree(target)) freeFields.push(target);
+    if ((isOnBoard(target) && fieldIsFree(target)) || allChipsInHomeQuarter())
+      freeFields.push(target);
     target = getTargetPosition(selectedField, diceRoll[0] + diceRoll[1]);
-    if (freeFields.length && isOnBoard(target) && fieldIsFree(target))
+    if (
+      (freeFields.length && isOnBoard(target) && fieldIsFree(target)) ||
+      allChipsInHomeQuarter()
+    )
       freeFields.push(target);
     return freeFields;
   };
@@ -132,11 +168,12 @@ function App() {
     }
     if (diceRoll.length === 4) {
       const target = getTargetPosition(selectedField, diceRoll[index]);
-      if (isOnBoard(target)) {
-        if (fieldIsFree(target)) {
-          f.push(target);
-          return getPossibleMoves(diceRoll, f, index + 1, target);
-        }
+      if (
+        (isOnBoard(target) && fieldIsFree(target)) ||
+        allChipsInHomeQuarter()
+      ) {
+        f.push(target);
+        return getPossibleMoves(diceRoll, f, index + 1, target);
       }
     } else {
       return getMovesForNonDoubleRoll(selectedField, diceRoll);
@@ -148,6 +185,16 @@ function App() {
       if (getPossibleMoves(game.diceLeft, [], 0, i).length > 0) return false;
     }
     return true;
+  };
+  const determineWhichDiceUsed = (
+    fieldId: number,
+    status: "normal" | "kicked" | "jumpout",
+    dice: number = 0
+  ): number => {
+    if (status === "normal") return Math.abs(fieldId - selectedChip.id);
+    else if (status === "kicked")
+      return game.activePlayer === 0 ? fieldId + 1 : 24 - fieldId;
+    else return dice;
   };
   const diceNotUsedYet = (diceRoll: number[], steps: number): number[] => {
     let start, end;
@@ -166,9 +213,24 @@ function App() {
     }
     return game.diceLeft.slice(start, end);
   };
-
+  const updateDice = (
+    fieldId: number,
+    status: "normal" | "kicked" | "jumpout",
+    dice: number = 0
+  ): void => {
+    const usedDie = determineWhichDiceUsed(fieldId, status, dice);
+    console.log(usedDie);
+    const unusedDice = diceNotUsedYet(game.diceLeft, usedDie);
+    setGame({
+      ...game,
+      diceLeft: unusedDice,
+    });
+    setSelectedChip({ ...selectedChip, selected: false });
+    if (unusedDice.length === 0) {
+      endRound();
+    }
+  };
   const selectChipWhenNoneSelected = (fieldId: number): void => {
-    if (noMovesPossible()) endRound();
     if (
       !hasChipsKickedOut() &&
       !selectedChip.selected &&
@@ -193,8 +255,20 @@ function App() {
   };
 
   const selectField = (fieldId: number) => {
-    let kicked;
-
+    let status: "normal" | "kicked" | "jumpout" = "normal";
+    if (noMovesPossible()) endRound();
+    if (
+      allChipsInHomeQuarter() &&
+      selectedChip.selected &&
+      selectedChip.id === fieldId
+    ) {
+      const diceUsed = takeChipOutOfGame(fieldId);
+      if (diceUsed) {
+        status = "jumpout";
+        updateDice(fieldId, "jumpout", diceUsed);
+        return;
+      }
+    }
     selectChipWhenNoneSelected(fieldId);
     unselectChip(fieldId);
     if (
@@ -202,36 +276,25 @@ function App() {
       getPossibleMoves(game.diceLeft).indexOf(fieldId) > -1
     ) {
       if (hasChipsKickedOut()) {
-        console.log(getPossibleMoves(game.diceLeft));
-        kicked = true;
+        status = "kicked";
         returnOnBoard();
       } else {
         removeChipFromField(selectedChip.id, game.activePlayer);
       }
       if (hasChipsOnField(fieldId, game.enemyPlayer)) takeEnemyStone(fieldId);
       addChipToField(fieldId, game.activePlayer);
-      setSelectedChip({ ...selectedChip, selected: false });
-      const usedDie = !kicked
-        ? Math.abs(fieldId - selectedChip.id)
-        : game.activePlayer === 0
-        ? fieldId + 1
-        : 24 - fieldId;
-      console.log(usedDie);
-      const unusedDice = diceNotUsedYet(game.diceLeft, usedDie);
-      setGame({
-        ...game,
-        diceLeft: unusedDice,
-      });
-      if (unusedDice.length === 0) {
-        endRound();
-      }
+      updateDice(fieldId, status);
     }
   };
 
   useEffect(() => {
     rollDiceToDetermineStartingPlayer();
     const diceRoll = saveDicerollInArrayToKeepTrackOfMovements();
-    setGame({ ...game, diceLeft: diceRoll, diceRoll: diceRoll });
+    setGame({
+      ...game,
+      diceLeft: diceRoll,
+      diceRoll: diceRoll,
+    });
   }, [dice]);
 
   if (game.round === 1)
