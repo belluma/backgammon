@@ -1,20 +1,26 @@
 import React from "react";
 import styles from "./Field.module.css";
 import Chip from "../Chip/Chip";
+import {useAppDispatch, useAppSelector} from "../../app/hooks";
+import {selectedChip, selectField} from "../../slicer/boardslice";
 
 type Props = {
     className?: string;
     chips: number[];
     top: boolean;
-    selected?: boolean;
-    selectField: () => void;
+    index: number,
 };
 
 const Field: React.FC<Props> & React.HTMLAttributes<HTMLDivElement> = (
-    {className, chips, top, selected, selectField}: Props) => {
+    {className, chips, top, index}: Props) => {
+    const selected = useAppSelector(selectedChip);
+    const dispatch = useAppDispatch();
+    const selectChip = () =>  {
+        dispatch(selectField(index))
+    }
     const amount = chips.reduce((a, b) => a + b);
     const getClassName = (i: number) => {
-        return ["chip", chips[0] > 0 ? "chip-white" : "chip-black", selected && i === amount - 1 && "selected"].join(' ');
+        return ["chip", chips[0] > 0 ? "chip-white" : "chip-black", selected === index && i === amount - 1 && "selected"].join(' ');
     }
     const chipStack = [...Array(amount)].map((_, i) => <Chip top={top} position={i} className={getClassName(i)}
                                                              key={i}/>)
@@ -22,7 +28,7 @@ const Field: React.FC<Props> & React.HTMLAttributes<HTMLDivElement> = (
         <section
             className={styles.Field}
             data-testid="Field"
-            onClick={() => selectField()}
+            onClick={ selectChip}
         >
             <div className={className}/>
             {chipStack}

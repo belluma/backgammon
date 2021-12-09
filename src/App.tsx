@@ -327,8 +327,6 @@ function App() {
                 <section style={{display: "inline-block"}}>
                     <Board
                         board={board}
-                        selectField={selectField}
-                        selectedField={selectedChip}
                         kickedChips={kickedChips}
                     />
                 </section>

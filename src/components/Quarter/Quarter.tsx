@@ -2,25 +2,32 @@ import React from "react";
 import styles from "./Quarter.module.css";
 import Field from "../Field/Field";
 import Edge from "../Edge/Edge";
+import {useAppDispatch, useAppSelector} from "../../app/hooks";
+import {selectField, selectedChip} from "../../slicer/boardslice";
 
 type Props = {
     top: boolean;
     quarter: number[][];
     id: number;
-    selectedField?: number;
-    selectField: (id: number) => void;
     className?: string;
     kickedChips?: number;
 };
 
-const Quarter = ({top, quarter, id, selectedField, selectField, className, kickedChips}: Props) => {
+const Quarter = ({top, quarter, id, className, kickedChips}: Props) => {
+    // const selectedField = useAppSelector(selectedChip);
+    // const dispatch = useAppDispatch()
+    // const selectField = (i: number) => {
+    //     dispatch(selectField(i))
+    // }
     const getClassName = (i: number) => {
-        return top ? `arrow-down ${i % 2 ? 'red' : 'black'}` : `arrow-up ${i % 2 ? 'black' : 'red'}`
-    }
+        const topColor = i % 2 ? 'red' : 'black';
+        const bottomColor = i % 2 ? 'black' : 'red';
+        return top ? `arrow-down ${topColor}` : `arrow-up ${bottomColor}`
+    };
     const fields = quarter.map((field, index) => {
         const i = top ? 5 - index : index;
-        return <Field top={top} chips={quarter[i]} key={i} className={getClassName(i)}
-                      selectField={() => selectField(id * 6 + i)} selected={selectedField === i}/>
+        return <Field top={top} chips={quarter[i]} key={i} className={getClassName(i)} index={id * 6 + i}
+                      />
     })
     return (
         <div className={styles.Quarter} data-testid="Quarter">
