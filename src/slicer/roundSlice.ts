@@ -7,7 +7,7 @@ const initialState = {
     enemyPlayer: 1,
     round: 0,
     diceRoll: [1, 1],
-    newRound: false
+    newRound: true
 }
 
 
@@ -15,16 +15,19 @@ export const roundSlice = createSlice({
     name: 'round',
     initialState,
     reducers: {
-        rollDice: (state, {payload}: PayloadAction<number[]>) => {
+        setDiceRoll: (state, {payload}: PayloadAction<number[]>) => {
             state.diceRoll = payload;
         },
         swapPlayers: (state) => {
             [state.activePlayer, state.enemyPlayer] = [state.enemyPlayer, state.activePlayer];
+        },
+        beginRound: (state) => {
+            state.newRound = false
         }
     },
 });
 
-export const {rollDice, swapPlayers} = roundSlice.actions;
+export const {setDiceRoll, swapPlayers, beginRound} = roundSlice.actions;
 
 export default roundSlice.reducer;
 export const selectActivePlayer = (state: RootState) => (state.round.activePlayer)

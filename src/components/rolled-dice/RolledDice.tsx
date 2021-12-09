@@ -1,7 +1,8 @@
 import React from 'react'
-import {rollDice} from "../../helpers/rollDice";
 import Dice from "../Dice/Dice";
-import useRound from "../../helpers/useRound";
+import {rollDice} from "../../helpers/helper";
+import {useAppDispatch, useAppSelector} from "../../app/hooks";
+import {beginRound, selectDiceRoll, selectNewRound, setDiceRoll as setDiceRoll} from "../../slicer/roundSlice";
 
 //component imports
 
@@ -10,12 +11,14 @@ import useRound from "../../helpers/useRound";
 type Props = {};
 
 function RolledDice(props: Props){
-    const {diceRoll, newRound, setNewRound, setDiceRoll} = useRound();
+    const diceRoll = useAppSelector(selectDiceRoll);
+    const newRound = useAppSelector(selectNewRound);
+    const dispatch = useAppDispatch();
     const rollTheDice = () => {
         if(!newRound)return;
-        setNewRound(false);
+        dispatch(beginRound);
         const dice = rollDice();
-        setDiceRoll(dice);
+        dispatch(setDiceRoll(dice));
     }
     return(
         <section className="vertical-align" onClick={rollTheDice}>
