@@ -6,13 +6,13 @@ import useBoard from "./helpers/useBoard";
 import useRound from "./helpers/useRound";
 import {rollDice} from "./helpers/rollDice";
 import RolledDice from "./components/rolled-dice/RolledDice";
+import {selectField} from "./helpers/moveChips";
 
 //initial setup of the board
 function App() {
     const {board, setBoard, resetBoard, kickedChips, setKickedChips} = useBoard();
     const {activePlayer, enemyPlayer, round, diceRoll} = useRound();
 
-    const selectField = () =>{}
     const selectedChip = undefined;
    //moved
    //  const rollDie = () => {
