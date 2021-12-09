@@ -3,7 +3,7 @@ import styles from "./Quarter.module.css";
 import Field from "../Field/Field";
 import Edge from "../Edge/Edge";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {selectField, selectedChip} from "../../slicer/boardslice";
+import {selectField, selectedChip} from "../../slicer/boardSlice";
 
 type Props = {
     top: boolean;
@@ -14,11 +14,6 @@ type Props = {
 };
 
 const Quarter = ({top, quarter, id, className, kickedChips}: Props) => {
-    // const selectedField = useAppSelector(selectedChip);
-    // const dispatch = useAppDispatch()
-    // const selectField = (i: number) => {
-    //     dispatch(selectField(i))
-    // }
     const getClassName = (i: number) => {
         const topColor = i % 2 ? 'red' : 'black';
         const bottomColor = i % 2 ? 'black' : 'red';

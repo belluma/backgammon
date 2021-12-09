@@ -1,10 +1,12 @@
 import {configureStore, ThunkAction, Action} from '@reduxjs/toolkit';
-import boardReducer from '../slicer/boardslice'
+import boardReducer from '../slicer/boardSlice'
+import roundReducer from '../slicer/roundSlice'
 
 
 export const store = configureStore({
     reducer: {
         board: boardReducer,
+        round: roundReducer,
     },
 });
 
