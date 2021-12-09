@@ -10,13 +10,12 @@ import useRound from "../../helpers/useRound";
 type Props = {};
 
 function RolledDice(props: Props){
-    const {diceRoll, newRound, setNewRound, setDiceRoll, setDiceLeft} = useRound();
+    const {diceRoll, newRound, setNewRound, setDiceRoll} = useRound();
     const rollTheDice = () => {
         if(!newRound)return;
         setNewRound(false);
         const dice = rollDice();
         setDiceRoll(dice);
-        setDiceLeft(dice);
     }
     return(
         <section className="vertical-align" onClick={rollTheDice}>

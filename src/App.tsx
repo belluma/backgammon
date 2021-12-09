@@ -10,11 +10,8 @@ import RolledDice from "./components/rolled-dice/RolledDice";
 //initial setup of the board
 function App() {
     const {board, setBoard, resetBoard, kickedChips, setKickedChips} = useBoard();
-    const {activePlayer, enemyPlayer, round, diceRoll, diceLeft} = useRound();
-    const rolledDice = [
-         <Dice num={diceRoll[0]} key={0}/>,
-         <Dice num={diceRoll[1]} key={1}/>,
-     ];
+    const {activePlayer, enemyPlayer, round, diceRoll} = useRound();
+
     const selectField = () =>{}
     const selectedChip = undefined;
    //moved
