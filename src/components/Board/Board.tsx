@@ -4,16 +4,16 @@ import Quarter from "../Quarter/Quarter";
 type Props = {
   className?: string;
   board: number[][];
-  selectedField: { selected: boolean; id: number };
+  selectedField?: { selected: boolean; id: number };
   kickedChips: number[];
   selectField: (id: number) => void;
 };
 
 const Board = (props: Props) => {
-  const selectedQuarter: number | undefined = props.selectedField.selected
+  const selectedQuarter: number | undefined = props.selectedField?.selected
     ? Math.floor(props.selectedField.id / 6)
     : undefined;
-  const selectedField: number | undefined = props.selectedField.selected
+  const selectedField: number | undefined = props.selectedField?.selected
     ? props.selectedField.id % 6
     : undefined;
   const quarter1: number[][] = props.board.slice(0, 6);
