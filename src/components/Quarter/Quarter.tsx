@@ -4,43 +4,30 @@ import Field from "../Field/Field";
 import Edge from "../Edge/Edge";
 
 type Props = {
-  top: boolean;
-  quarter: number[][];
-  id: number;
-  selectedField?: number;
-  selectField: (id: number) => void;
-  className?: string;
-  kickedChips?: number;
+    top: boolean;
+    quarter: number[][];
+    id: number;
+    selectedField?: number;
+    selectField: (id: number) => void;
+    className?: string;
+    kickedChips?: number;
 };
 
-const Quarter = (props: Props) => {
-  const quarter = [];
-  const q = props.quarter;
-  for (let i = 0; i < 6; i++) {
-    let classes;
-    classes = props.top ? "arrow-down" : "arrow-up";
-    classes = i % 2 === 1 ? classes + " red" : classes + " black";
-    const f = (
-      <Field
-        top={props.top}
-        chips={q[i]}
-        key={i}
-        className={classes}
-        selectField={() => props.selectField(props.id * 6 + i)}
-        selected={props.selectedField === i }
-      />
+const Quarter = ({top, quarter, id, selectedField, selectField, className, kickedChips}: Props) => {
+    const getClassName = (i: number) => {
+        return top ? `arrow-down ${i % 2 ? 'red' : 'black'}` : `arrow-up ${i % 2 ? 'black' : 'red'}`
+    }
+    const fields = quarter.map((field, index) => {
+        const i = top ? 5 - index : index;
+        return <Field top={top} chips={quarter[i]} key={i} className={getClassName(i)}
+                      selectField={() => selectField(id * 6 + i)} selected={selectedField === i}/>
+    })
+    return (
+        <div className={styles.Quarter} data-testid="Quarter">
+            <div className={className}>{fields}
+                {id % 3 && <Edge top={top} chips={kickedChips} key={6}/>}</div>
+        </div>
     );
-    if (props.top) quarter.unshift(f);
-    else quarter.push(f);
-  }
-  if (props.id % 3 !== 0)
-    quarter.push(<Edge top={props.top} chips={props.kickedChips} key={6} />);
-
-  return (
-    <div className={styles.Quarter} data-testid="Quarter">
-      <div className={props.className}>{quarter}</div>
-    </div>
-  );
 };
 
 export default Quarter;
