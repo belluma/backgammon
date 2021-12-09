@@ -7,7 +7,7 @@ const useRound = () => {
     const [round, setRound] = useState<number>(0);
     const [diceRoll, setDiceRoll] = useState<number[]>([1, 1]);
     const [diceLeft, setDiceLeft] = useState<number[]>();
-
+    const [newRound, setNewRound] = useState(false);
 
     return {
         activePlayer,
@@ -19,7 +19,9 @@ const useRound = () => {
         diceRoll,
         setDiceRoll,
         diceLeft,
-        setDiceLeft
+        setDiceLeft,
+        newRound,
+        setNewRound
     }
 
 
