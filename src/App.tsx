@@ -64,20 +64,12 @@ function App() {
 
     const hasChipsKickedOut = (): boolean => kickedChips[game.activePlayer] > 0;
 
-    const opponent = (player: number) => player * -1 + 1
-
     const removeChipFromField = (fieldIndex: number, player: number, currentBoard:number[][] ): void  => {
         currentBoard[fieldIndex][player]--;
-
-        // const fieldWithStoneRemoved = [...currentBoard[fieldIndex]];
-        // fieldWithStoneRemoved[player]--
-        // return currentBoard.map((field, index) => fieldIndex === index ? fieldWithStoneRemoved : field);
     };
     const addChipToField = (fieldIndex: number, player: number, currentBoard:number[][] ): void => {
         currentBoard[fieldIndex][player]++;
-        // const fieldWithStoneAdded = [...currentBoard[fieldIndex]];
-        // fieldWithStoneAdded[player]++
-        // return (currentBoard.map((field, index) => fieldIndex === index ? fieldWithStoneAdded : field));
+
     };
     const returnOnBoard = (): void => {
         kickedChips[game.activePlayer]--;
@@ -256,7 +248,7 @@ function App() {
             round: game.round + 1,
         });
     };
-    const possibleMovesLeft = (fieldId: number): boolean => getPossibleMoves(game.diceLeft).indexOf(fieldId) > 1;
+    const possibleMovesLeft = (fieldId: number): boolean => getPossibleMoves(game.diceLeft).indexOf(fieldId) > -11;
 
     const selectField = (fieldId: number) => {
         let status: "normal" | "kicked" | "jumpout" = "normal";
@@ -275,18 +267,15 @@ function App() {
         }
         selectChipWhenNoneSelected(fieldId);
         unselectChip(fieldId);
-
-
         if (
             (selectedChip.selected || hasChipsKickedOut()) &&
-            getPossibleMoves(game.diceLeft).indexOf(fieldId) > -1
+         possibleMovesLeft(fieldId)
         ) {
             if (hasChipsKickedOut()) {
                 status = "kicked";
                 returnOnBoard();
             } else {
                 removeChipFromField(selectedChip.id, game.activePlayer, currentBoard)
-                // setBoard(addChipToField(fieldId, game.activePlayer, (removeChipFromField(selectedChip.id, game.activePlayer))))
             }
             if (hasChipsOnField(fieldId, game.enemyPlayer)) takeEnemyStone(fieldId, currentBoard);
             addChipToField(fieldId, game.activePlayer, currentBoard);
