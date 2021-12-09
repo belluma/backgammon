@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect  } from "react";
 import "./App.css";
 import Board from "./components/Board/Board";
 import Dice from "./components/Dice/Dice";
 
 //initial setup of the board
-let board: number[][] = [...Array(24)].map((a) => (a = [0, 0]));
+let board: number[][] = [...Array(24)].map((a) => [0, 0]);
 let kickedChips = [0, 0];
 const chips = [
   { pos: 0, amount: 2 },
@@ -13,7 +13,7 @@ const chips = [
   { pos: 18, amount: 5 },
 ];
 const setupBoard = () => {
-  board.forEach((field, i) => {
+  board.forEach((field,i) => {
     field[0] = field[1] = 0;
 
     chips.forEach((a) => {
@@ -62,7 +62,7 @@ function App() {
   //each round
   const saveDicerollInArrayToKeepTrackOfMovements = () => {
     return dice.dieOne === dice.dieTwo
-      ? [...Array(4)].map((a) => (a = dice.dieOne))
+      ? [...Array(4)].map((_) => dice.dieOne)
       : [dice.dieOne, dice.dieTwo];
   };
   const fieldIsFree = (field: number): boolean => {
@@ -127,14 +127,11 @@ function App() {
   const takeChipOutOfGame = (fieldId: number, player = game.activePlayer) => {
     const distance = player === 0 ? 24 - fieldId : fieldId + 1;
     console.log(distance);
-    for (let i = 0; i < game.diceLeft.length; i++) {
-      if (
-        distance === game.diceLeft[i] ||
-        (distance < game.diceLeft[i] && noChipsBehindInHomeField(fieldId))
-      ) {
+    for(const die of game.diceLeft){
+      if(distance === die|| (distance < die && noChipsBehindInHomeField(fieldId))){
         console.log(fieldId, player);
-        removeChipFromField(fieldId, player);
-        return game.diceLeft[i];
+        removeChipFromField(fieldId, player)
+        return die
       }
     }
   };
@@ -203,13 +200,13 @@ function App() {
   };
   const determineWhichDiceUsed = (
     fieldId: number,
-    status: "normal" | "kicked" | "jumpout",
-    dice: number = 0
+    status: "normal" | "kicked" |'jumpout' ,
+    dieUsed: number = 0
   ): number => {
     if (status === "normal") return Math.abs(fieldId - selectedChip.id);
     else if (status === "kicked")
       return game.activePlayer === 0 ? fieldId + 1 : 24 - fieldId;
-    else return dice;
+    else return dieUsed;
   };
   const diceNotUsedYet = (diceRoll: number[], steps: number): number[] => {
     let start, end;
@@ -231,9 +228,9 @@ function App() {
   const updateDice = (
     fieldId: number,
     status: "normal" | "kicked" | "jumpout",
-    dice: number = 0
+    distanceMoved: number = 0
   ): void => {
-    const usedDie = determineWhichDiceUsed(fieldId, status, dice);
+    const usedDie = determineWhichDiceUsed(fieldId, status, distanceMoved);
     console.log(usedDie);
     const unusedDice = diceNotUsedYet(game.diceLeft, usedDie);
     setGame({
@@ -280,7 +277,6 @@ function App() {
     ) {
       const diceUsed = takeChipOutOfGame(fieldId);
       if (diceUsed) {
-        status = "jumpout";
         updateDice(fieldId, "jumpout", diceUsed);
         return;
       }
@@ -304,18 +300,16 @@ function App() {
   };
 
   useEffect(() => {
-    rollDiceToDetermineStartingPlayer();
+    if(game.round === 0)rollDiceToDetermineStartingPlayer();
+    else{
     const diceRoll = saveDicerollInArrayToKeepTrackOfMovements();
-    if (game.round > 0)
       setGame({
         ...game,
         diceLeft: diceRoll,
         diceRoll: diceRoll,
-      });
+      });}
   }, [dice]);
 
-  if (game.round === 1)
-    console.log(`'Player ${game.activePlayer}  starts the game`);
 
   let rolledDice = [
     <Dice num={dice.dieOne} key={0} />,
@@ -323,7 +317,7 @@ function App() {
   ];
   return (
     <section>
-      <h1>It's your game Player {game.activePlayer}</h1>
+      <h1>It's your turn Player {game.activePlayer}</h1>
       <section className={"board"}>
         <section style={{ display: "inline-block" }}>
           <Board

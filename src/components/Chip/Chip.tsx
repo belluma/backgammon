@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./Chip.module.css";
 
 type Props = {
   className?: string;

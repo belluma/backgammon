@@ -7,7 +7,7 @@ type Props = {
   top: boolean;
   quarter: number[][];
   id: number;
-  selectedField?: number | undefined;
+  selectedField?: number;
   selectField: (id: number) => void;
   className?: string;
   kickedChips?: number;
@@ -27,7 +27,7 @@ const Quarter = (props: Props) => {
         key={i}
         className={classes}
         selectField={() => props.selectField(props.id * 6 + i)}
-        selected={props.selectedField === i ? true : false}
+        selected={props.selectedField === i }
       />
     );
     if (props.top) quarter.unshift(f);

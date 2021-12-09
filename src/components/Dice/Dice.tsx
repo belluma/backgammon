@@ -12,12 +12,9 @@ type Props = {
 };
 
 const Dice = (props: Props) => {
-  // const rollDice = () => {
-  //   topSide = points[Math.floor(Math.random() * 6)];
-  // };
+
   const points = [one, two, three, four, five, six];
   let topSide = points[props.num - 1];
-  // rollDice();
   return (
     <div className={styles.Dice}>
       <img src={topSide} alt="one" style={{ width: "100px" }} />
