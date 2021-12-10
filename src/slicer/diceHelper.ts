@@ -6,12 +6,15 @@ export const removeDiceUsed = ({board, round}: RootState, fieldId: number) => {
     const stepsTaken = Math.abs(fieldId - board.selectedChip)
     const index = dice.indexOf(stepsTaken);
     if (index >= 0) dice.splice(index, 1);
-    else{
+    else {
         let counter = 0
-        while(dice.slice(0,counter).reduce((a, b) => a + b, 0) < stepsTaken){
+        while (dice.slice(0, counter).reduce((a, b) => a + b, 0) < stepsTaken) {
             counter++;
+            if (dice.slice(0, counter).reduce((a, b) => a + b, 0) === stepsTaken) {
+                dice.splice(0, counter);
+                break;
+            }
         }
-        dice.splice(0, counter);
     }
     return dice;
 }

@@ -1,9 +1,11 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../app/store';
 import {RoundState} from "./roundHelper";
+import {selectUnselect, setPossibleMoves} from "./boardSlice";
+import {getPossibleMoves} from "./moveChipsHelper";
 
 
-const initialState:RoundState = {
+const initialState: RoundState = {
     activePlayer: 0,
     enemyPlayer: 1,
     round: 0,
@@ -11,6 +13,18 @@ const initialState:RoundState = {
     newRound: true
 }
 
+export const rollDiceAndCheckForKickedStones = createAsyncThunk<void, number[], { state: RootState, dispatch: Dispatch }>(
+    "rollDice",
+    (diceRoll, {getState, dispatch}) => {
+        dispatch(setDiceRoll(diceRoll));
+        const {kickedChips} = getState().board;
+        const {activePlayer} = getState().round;
+        if (kickedChips[activePlayer]) {
+            dispatch(selectUnselect(activePlayer ? 24 : -1))
+            dispatch(setPossibleMoves(getPossibleMoves(getState())));
+        }
+    }
+)
 
 export const roundSlice = createSlice({
     name: 'round',

@@ -14,17 +14,6 @@ const Edge = ({top}: Props) => {
     const classNames = top
         ? ["chip", "chip-black"]
         : ["chip", "chip-white"];
-    // if (props.chips !== undefined)
-    //   for (let i = 0; i < props.chips; i++) {
-    //     chips.push(
-    //       <Chip
-    //         top={top}
-    //         className={classNames.join(" ")}
-    //         position={i}
-    //         key={i}
-    //       />
-    //     );
-    //   }
     return <div className={styles.Edge}>
         {[...Array(chips)].map((chip, i) => <Chip
             top={top}

@@ -21,23 +21,20 @@ export const handleClickOnField = createAsyncThunk<number | undefined, number, {
             dispatch(updateBoard(moveStone(dispatch, getState(), fieldId)));
             dispatch(setDiceRoll(removeDiceUsed(getState(), fieldId)))
             dispatch(selectUnselect(selectedChip));
-            if (!getState().round.diceRoll.length) dispatch(swapPlayers())
+            if (!getState().round.diceRoll.length) {
+                dispatch(swapPlayers())
+            }
             return undefined;
         }
         if (!getState().round.diceRoll.length) {
             //add feedback to user
             return;
         }
-        //if chips kicked out selected = kickedout
-        //if selected get free fields, if free move
-        //if !selected select
         if (playerHasChipsOnField(getState(), fieldId)) {
             dispatch(selectUnselect(fieldId));
-            //get possible moves
         }
         dispatch(setPossibleMoves(getPossibleMoves(getState())));
         return fieldId;
-        // return fieldId;
     })
 
 
