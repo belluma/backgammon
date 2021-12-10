@@ -2,8 +2,6 @@ import React from "react";
 import styles from "./Quarter.module.css";
 import Field from "../Field/Field";
 import Edge from "../Edge/Edge";
-import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {selectField, selectedChip} from "../../slicer/boardSlice";
 
 type Props = {
     top: boolean;

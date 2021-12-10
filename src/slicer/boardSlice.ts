@@ -17,13 +17,14 @@ export const handleClickOnField = createAsyncThunk<number | undefined, number, {
         const {selectedChip} = getState().board
         if (selectedChip !== undefined && selectedChip !== fieldId) {
             dispatch(updateBoard(moveStone(getState(), fieldId)))
+            dispatch(selectUnselect(selectedChip))
             return undefined
         }
         //if chips kicked out selected = kickedout
         //if selected get free fields, if free move
         //if !selected select
         if (playerHasChipsOnField(getState(), fieldId)) {
-            dispatch(selectField(fieldId));
+            dispatch(selectUnselect(fieldId));
             //get possible moves
         }
         dispatch(setPossibleMoves(getPossibleMoves(getState())));
@@ -36,7 +37,8 @@ export const boardSlice = createSlice({
     name: 'board',
     initialState,
     reducers: {
-        selectField: (state, {payload}: ChipAction) => {
+        selectUnselect: (state, {payload}: ChipAction) => {
+            console.log(payload, state.selectedChip);
             if (state.selectedChip === undefined) {
                 state.selectedChip = payload;
                 return
@@ -59,7 +61,7 @@ export const boardSlice = createSlice({
     }
 });
 
-export const {selectField, setPossibleMoves, updateBoard} = boardSlice.actions;
+export const {selectUnselect, setPossibleMoves, updateBoard} = boardSlice.actions;
 
 export const selectedChip = (state: RootState) => state.board.selectedChip;
 export const selectBoard = (state: RootState) => state.board.board;

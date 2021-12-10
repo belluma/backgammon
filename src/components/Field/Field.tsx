@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./Field.module.css";
 import Chip from "../Chip/Chip";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {handleClickOnField, selectedChip, selectField, selectPossibleMoves} from "../../slicer/boardSlice";
+import {handleClickOnField, selectedChip,  selectPossibleMoves} from "../../slicer/boardSlice";
 
 type Props = {
     className: string;

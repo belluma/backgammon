@@ -45,15 +45,14 @@ export const getPossibleMoves = ({board, round}: RootState) => {
 }
 
 const removeChipFromField = (fieldIndex: number, player: number, currentBoard: number[][]): void => {
-    console.log(currentBoard[fieldIndex][player])
-    // currentBoard[fieldIndex][player]--;
+    currentBoard[fieldIndex][player]--;
 };
 const addChipToField = (fieldIndex: number, player: number, currentBoard: number[][]): void => {
-    // currentBoard[fieldIndex][player]++;
+    currentBoard[fieldIndex][player]++;
 };
 
 export const moveStone = ({board, round}: RootState, fieldId: number): number[][] => {
-    const currentBoard = [...board.board];
+    const currentBoard = [...board.board.map(field => [...field])];
     if (board.possibleMoves.indexOf(fieldId) >= 0) {
         //@ts-ignore gets executed only after check for selectedChip
         removeChipFromField(board.selectedChip, round.activePlayer, currentBoard)
