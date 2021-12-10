@@ -21,6 +21,7 @@ export const roundSlice = createSlice({
         },
         swapPlayers: (state) => {
             [state.activePlayer, state.enemyPlayer] = [state.enemyPlayer, state.activePlayer];
+            state.newRound = true;
         },
         beginRound: (state) => {
             state.newRound = false

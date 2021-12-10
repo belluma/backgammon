@@ -2,7 +2,7 @@ import {createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/t
 import {RootState} from '../app/store';
 import {BoardAction, BoardState, ChipAction, MoveAction, startBoard} from "./boardHelper";
 import {getPossibleMoves, moveStone, playerHasChipsOnField} from "./moveChipsHelper";
-import {setDiceRoll} from "./roundSlice";
+import {setDiceRoll, swapPlayers} from "./roundSlice";
 import {removeDiceUsed} from "./diceHelper";
 
 
@@ -21,6 +21,7 @@ export const handleClickOnField = createAsyncThunk<number | undefined, number, {
             dispatch(updateBoard(moveStone(getState(), fieldId)));
             dispatch(setDiceRoll(removeDiceUsed(getState(), fieldId)))
             dispatch(selectUnselect(selectedChip));
+            if(!getState().round.diceRoll.length) dispatch(swapPlayers())
             return undefined;
         }
         //if chips kicked out selected = kickedout

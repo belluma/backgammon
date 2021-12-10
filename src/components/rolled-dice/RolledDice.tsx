@@ -22,8 +22,8 @@ function RolledDice(props: Props){
     }
     return(
         <section className="vertical-align" onClick={rollTheDice}>
-            <Dice num={diceRoll[0]} key={0}/>,
-            <Dice num={diceRoll[1]} key={1}/>,
+            {diceRoll.map((die, i) => <Dice num={die} key={i}/>)}
+            {!diceRoll.length && <p>click to roll the dice</p>}
         </section>
     )
 }

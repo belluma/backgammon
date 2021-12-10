@@ -8,7 +8,7 @@ export const removeDiceUsed = ({board, round}: RootState, fieldId: number) => {
     if (index >= 0) dice.splice(index, 1);
     else{
         let counter = 0
-        while(dice.slice(0,counter).reduce((a, b) => a + b) < stepsTaken){
+        while(dice.slice(0,counter).reduce((a, b) => a + b, 0) < stepsTaken){
             counter++;
         }
         dice.splice(0, counter);
