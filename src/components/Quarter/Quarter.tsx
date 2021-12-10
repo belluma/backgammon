@@ -25,7 +25,7 @@ const Quarter = ({top, quarter, id, className, kickedChips}: Props) => {
     return (
         <div className={styles.Quarter} data-testid="Quarter">
             <div className={className}>{fields}
-                {id % 3 && <Edge top={top} chips={kickedChips} key={6}/>}</div>
+                {id % 3 && <Edge top={top}  key={6}/>}</div>
         </div>
     );
 };

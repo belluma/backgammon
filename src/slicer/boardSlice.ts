@@ -78,4 +78,5 @@ export const {selectUnselect, setPossibleMoves, updateBoard, kickStone} = boardS
 export const selectedChip = (state: RootState) => state.board.selectedChip;
 export const selectBoard = (state: RootState) => state.board.board;
 export const selectPossibleMoves = (state: RootState) => state.board.possibleMoves;
+export const selectKickedChips = (state: RootState) => state.board.kickedChips;
 export default boardSlice.reducer;

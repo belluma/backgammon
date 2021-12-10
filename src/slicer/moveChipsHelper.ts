@@ -67,8 +67,5 @@ export const moveStone = (dispatch: Dispatch, {board, round}: RootState, fieldId
         addChipToField(fieldId, round.activePlayer, currentBoard);
         if(needToKickEnemy({board, round}, fieldId)) kickEnemyStone(dispatch, {board, round}, fieldId, currentBoard);
     }
-    //if enemy stone kick out
-    //get dice used and take of roll
-    //retunr updated board
     return currentBoard;
 }
