@@ -7,9 +7,10 @@ export interface BoardState {
     kickedChips: number[],
 }
 
-export type ChipAction = PayloadAction<number | undefined>
-export type MoveAction = PayloadAction<number[]>
-export type BoardAction = PayloadAction<number[][]>
+export type ChipAction = PayloadAction<number | undefined>;
+export type MoveAction = PayloadAction<number[]>;
+export type BoardAction = PayloadAction<number[][]>;
+export type PlayerAction = PayloadAction<1 | 0>;
 
 const emptyBoard: number[][] = [...Array(24)].map((a) => [0, 0]);
 

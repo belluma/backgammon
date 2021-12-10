@@ -1,6 +1,6 @@
 import {RootState} from "../app/store";
 import {Dispatch} from "@reduxjs/toolkit";
-import {kickStone} from "./boardSlice";
+import {kickStone, returnOnBoard} from "./boardSlice";
 
 
 export const playerHasChipsOnField = ({round, board}: RootState, fieldId: number | undefined) => {
@@ -21,7 +21,7 @@ const fieldIsFree = ({board, round}: RootState, fieldId: number): boolean => {
     return board.board[fieldId][round.enemyPlayer] <= 1;
 };
 
-export const getPossibleMoves = ({board, round}: RootState) => {
+export const getPossibleMoves = ({board, round}: RootState, kickedOut = false) => {
     const moves: number[] = [];
     const dice = [...round.diceRoll];
     if (board.selectedChip === undefined) return moves;
@@ -31,6 +31,7 @@ export const getPossibleMoves = ({board, round}: RootState) => {
         //@ts-ignore function returns when selected chip undefined
         if (fieldIsFree({board, round}, target)) moves.push(target)
     })
+    if(kickedOut) return moves;
     const getNextMoves = (usedDie: number, index: number) => {
         const nextStep = usedDie + dice[index];
         //@ts-ignore function returns when selected chip undefined
@@ -45,14 +46,18 @@ export const getPossibleMoves = ({board, round}: RootState) => {
     return moves;
 }
 
-const removeChipFromField = (fieldIndex: number, player: number, currentBoard: number[][]): void => {
+const removeChipFromField = (dispatch:Dispatch, fieldIndex: number, player: 1 | 0, currentBoard: number[][]): void => {
+    if(fieldIndex === -1 || fieldIndex === 24) {
+        dispatch(returnOnBoard(player));
+        return
+    }
     currentBoard[fieldIndex][player]--;
 };
-const addChipToField = (fieldIndex: number, player: number, currentBoard: number[][]): void => {
+const addChipToField = (fieldIndex: number, player: 1 | 0, currentBoard: number[][]): void => {
     currentBoard[fieldIndex][player]++;
 };
 const kickEnemyStone = (dispatch:Dispatch, {board, round}:RootState, fieldId:number, currentBoard: number[][]): void => {
-    removeChipFromField(fieldId, round.enemyPlayer, currentBoard);
+    removeChipFromField(dispatch, fieldId, round.enemyPlayer, currentBoard);
     dispatch(kickStone(round.enemyPlayer));
 }
 const needToKickEnemy = ({board, round}:RootState, fieldId:number):boolean => {
@@ -63,7 +68,7 @@ export const moveStone = (dispatch: Dispatch, {board, round}: RootState, fieldId
     const currentBoard = [...board.board.map(field => [...field])];
     if (board.possibleMoves.indexOf(fieldId) >= 0) {
         //@ts-ignore gets executed only after check for selectedChip
-        removeChipFromField(board.selectedChip, round.activePlayer, currentBoard)
+        removeChipFromField(dispatch, board.selectedChip, round.activePlayer, currentBoard)
         addChipToField(fieldId, round.activePlayer, currentBoard);
         if(needToKickEnemy({board, round}, fieldId)) kickEnemyStone(dispatch, {board, round}, fieldId, currentBoard);
     }

@@ -21,7 +21,7 @@ export const rollDiceAndCheckForKickedStones = createAsyncThunk<void, number[], 
         const {activePlayer} = getState().round;
         if (kickedChips[activePlayer]) {
             dispatch(selectUnselect(activePlayer ? 24 : -1))
-            dispatch(setPossibleMoves(getPossibleMoves(getState())));
+            dispatch(setPossibleMoves(getPossibleMoves(getState(), true)));
         }
     }
 )

@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../app/store';
-import {BoardAction, BoardState, ChipAction, MoveAction, startBoard} from "./boardHelper";
+import {BoardAction, BoardState, ChipAction, MoveAction, PlayerAction, startBoard} from "./boardHelper";
 import {getPossibleMoves, moveStone, playerHasChipsOnField} from "./moveChipsHelper";
 import {setDiceRoll, swapPlayers} from "./roundSlice";
 import {removeDiceUsed} from "./diceHelper";
@@ -58,8 +58,11 @@ export const boardSlice = createSlice({
         updateBoard: (state, {payload}: BoardAction) => {
             state.board = payload;
         },
-        kickStone: (state, {payload}: PayloadAction<1 | 0>) => {
+        kickStone: (state, {payload}: PlayerAction) => {
             state.kickedChips[payload]++;
+        },
+        returnOnBoard: (state, {payload}:PlayerAction) => {
+            state.kickedChips[payload]--;
         }
     },
     extraReducers: builder => {
@@ -70,7 +73,7 @@ export const boardSlice = createSlice({
     }
 });
 
-export const {selectUnselect, setPossibleMoves, updateBoard, kickStone} = boardSlice.actions;
+export const {selectUnselect, setPossibleMoves, updateBoard, kickStone, returnOnBoard} = boardSlice.actions;
 
 export const selectedChip = (state: RootState) => state.board.selectedChip;
 export const selectBoard = (state: RootState) => state.board.board;
