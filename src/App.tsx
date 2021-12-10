@@ -1,4 +1,4 @@
-import React, { useEffect} from "react";
+import React, {ChangeEvent, useEffect} from "react";
 import "./App.css";
 import Board from "./components/Board/Board";
 import useBoard from "./helpers/useBoard";
@@ -6,7 +6,7 @@ import RolledDice from "./components/rolled-dice/RolledDice";
 import {useAppDispatch, useAppSelector} from "./app/hooks";
 import {determineStartingPlayer} from "./helpers/helper";
 import {setDiceRoll, selectActivePlayer, swapPlayers} from "./slicer/roundSlice";
-import {selectBoard} from "./slicer/boardSlice";
+import {handleClickOnField, selectBoard} from "./slicer/boardSlice";
 
 function App() {
     const dispatch = useAppDispatch();
@@ -15,7 +15,9 @@ function App() {
         dispatch(setDiceRoll(dice));
         if (dice[0] < dice[1]) dispatch(swapPlayers())
     }, []);
-
+    const jumpout = () => {
+        dispatch(handleClickOnField(activePlayer ? -1 : 24))
+    }
     const activePlayer = useAppSelector(selectActivePlayer);
     const board = useAppSelector(selectBoard);
 
@@ -338,7 +340,7 @@ function App() {
                         kickedChips={kickedChips}
                     />
                 </section>
-                <section className="side">
+                <section className="side" onClick={jumpout}>
                     <RolledDice/>
                 </section>
             </section>

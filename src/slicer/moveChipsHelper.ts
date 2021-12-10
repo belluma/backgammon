@@ -1,5 +1,5 @@
 import {RootState} from "../app/store";
-import {Dispatch} from "@reduxjs/toolkit";
+import {current, Dispatch} from "@reduxjs/toolkit";
 import {kickStone, returnOnBoard, selectedChip} from "./boardSlice";
 
 
@@ -15,9 +15,17 @@ const allChipsInHomeQuarter = ({chips, round}: RootState): boolean => {
     if (chips.kickedChips[round.activePlayer] > 0) return false;
     return notHome.reduce((a, b) => a + b[round.activePlayer], 0) === 0;
 };
+const addExitToPossibleMoves = ({chips, round}: RootState, target: number, moves: number[]) => {
+    if (allChipsInHomeQuarter({chips, round}) && target < 0 && moves.indexOf(-1) === -1) {
+        moves.push(-1)
+    }
+    if (allChipsInHomeQuarter({chips, round}) && target > 23 && moves.indexOf(24) === -1) {
+        moves.push(24);
+    }
+}
 
 const fieldIsFree = ({chips, round}: RootState, fieldId: number): boolean => {
-    if (!isOnBoard(fieldId) && !allChipsInHomeQuarter({chips, round})) return false;
+    if (!isOnBoard(fieldId) ) return false;
     return chips.board[fieldId][round.enemyPlayer] <= 1;
 };
 const getBaseMoves = ({chips, round}: RootState) => {
@@ -28,6 +36,7 @@ const getBaseMoves = ({chips, round}: RootState) => {
     diceRoll.forEach(die => {
         const target = (activePlayer ? (die * -1) : die) + selectedChip;
         if (fieldIsFree({chips, round}, target) && moves.indexOf(target) < 0) moves.push(target);
+        addExitToPossibleMoves({chips, round}, target, moves);
     })
     return moves;
 }
@@ -93,6 +102,7 @@ export const moveStone = (dispatch: Dispatch, {chips, round}: RootState, fieldId
     if (chips.possibleMoves.indexOf(fieldId) >= 0) {
         //@ts-ignore gets executed only after check for selectedChip
         removeChipFromField(dispatch, chips.selectedChip, round.activePlayer, currentBoard)
+        if(fieldId < 0 || fieldId > 23) return currentBoard
         addChipToField(fieldId, round.activePlayer, currentBoard);
         if (needToKickEnemy({chips, round}, fieldId)) kickEnemyStone(dispatch, {chips, round}, fieldId, currentBoard);
     }

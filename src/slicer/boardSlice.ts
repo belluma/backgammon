@@ -1,4 +1,4 @@
-import {createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice, Dispatch} from '@reduxjs/toolkit';
 import {RootState} from '../app/store';
 import {BoardAction, BoardState, ChipAction, MoveAction, PlayerAction, startBoard} from "./boardHelper";
 import {
@@ -25,21 +25,34 @@ const endRound = (dispatch: Dispatch) => {
     dispatch(swapPlayers());
 }
 
+const selectKickedOutStone = (state:RootState, dispatch:Dispatch) =>{
+    if (hasChipsKickedOut(state)) {
+        dispatch(selectUnselect(state.round.activePlayer ? 24 : -1));
+        dispatch(setPossibleMoves(getPossibleMoves(state)));
+    }
+}
+const moveAndUpdateDice = (state:RootState, dispatch:Dispatch, fieldId: number) => {
+    dispatch(updateBoard(moveStone(dispatch, state, fieldId)));
+    dispatch(setDiceRoll(removeDiceUsed(state, fieldId)))
+    dispatch(selectUnselect(state.chips.selectedChip));
+}
+
 export const handleClickOnField = createAsyncThunk<number | undefined, number, { state: RootState, dispatch: Dispatch }>(
     'fieldClickHandler',
     (fieldId, {getState, dispatch}) => {
         const {selectedChip, possibleMoves} = getState().chips;
-        const {activePlayer} = getState().round;
         if (selectedChip !== undefined && selectedChip !== fieldId) {
-            if(noMovesPossible(getState())) endRound(dispatch);
-            if(possibleMoves.indexOf(fieldId) === -1) return;
-            dispatch(updateBoard(moveStone(dispatch, getState(), fieldId)));
-            dispatch(setDiceRoll(removeDiceUsed(getState(), fieldId)))
-            dispatch(selectUnselect(selectedChip));
-            if(hasChipsKickedOut(getState())) {
-                dispatch(selectUnselect(activePlayer ? 24 : -1));
-                dispatch(setPossibleMoves(getPossibleMoves(getState())));
-            }
+            if (noMovesPossible(getState())) endRound(dispatch);
+            if (possibleMoves.indexOf(fieldId) === -1) return;
+            moveAndUpdateDice(getState(), dispatch, fieldId);
+            // dispatch(updateBoard(moveStone(dispatch, getState(), fieldId)));
+            // dispatch(setDiceRoll(removeDiceUsed(getState(), fieldId)))
+            // dispatch(selectUnselect(selectedChip));
+            // if (hasChipsKickedOut(getState())) {
+            //     dispatch(selectUnselect(activePlayer ? 24 : -1));
+            //     dispatch(setPossibleMoves(getPossibleMoves(getState())));
+            // }
+            selectKickedOutStone(getState(), dispatch)
             if (!getState().round.diceRoll.length || noMovesPossible(getState())) {
                 endRound(dispatch);
             }
@@ -49,9 +62,10 @@ export const handleClickOnField = createAsyncThunk<number | undefined, number, {
             //add feedback to user
             return;
         }
+        if (noMovesPossible(getState())) endRound(dispatch);
         if (playerHasChipsOnField(getState(), fieldId)) {
             dispatch(selectUnselect(fieldId));
-            if(noMovesPossible(getState())) endRound(dispatch);
+
         }
         dispatch(setPossibleMoves(getPossibleMoves(getState())));
         return fieldId;
@@ -72,7 +86,7 @@ export const boardSlice = createSlice({
                 state.possibleMoves = [];
             }
         },
-        unselectChip: (state) =>{
+        unselectChip: (state) => {
             state.selectedChip = undefined;
         },
         setPossibleMoves: (state, {payload}: MoveAction) => {
@@ -84,18 +98,25 @@ export const boardSlice = createSlice({
         kickStone: (state, {payload}: PlayerAction) => {
             state.kickedChips[payload]++;
         },
-        returnOnBoard: (state, {payload}:PlayerAction) => {
+        returnOnBoard: (state, {payload}: PlayerAction) => {
             state.kickedChips[payload]--;
         }
     },
-    extraReducers: builder => {
-        builder
-            .addCase(handleClickOnField.fulfilled, (state, {payload}: ChipAction) => {
-            })
-    }
+    // extraReducers: builder => {
+    //     builder
+    //         .addCase(handleClickOnField.fulfilled, (state, {payload}: ChipAction) => {
+    //         })
+    // }
 });
 
-export const {selectUnselect,unselectChip, setPossibleMoves, updateBoard, kickStone, returnOnBoard} = boardSlice.actions;
+export const {
+    selectUnselect,
+    unselectChip,
+    setPossibleMoves,
+    updateBoard,
+    kickStone,
+    returnOnBoard
+} = boardSlice.actions;
 
 export const selectedChip = (state: RootState) => state.chips.selectedChip;
 export const selectBoard = (state: RootState) => state.chips.board;

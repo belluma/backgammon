@@ -19,7 +19,8 @@ function RolledDice(props: Props) {
     const diceRoll = useAppSelector(selectDiceRoll);
     const newRound = useAppSelector(selectNewRound);
     const dispatch = useAppDispatch();
-    const rollTheDice = () => {
+    const rollTheDice = (e:React.MouseEvent) => {
+        e.stopPropagation();
         if (!newRound) return;
         dispatch(beginRound);
         const dice = rollDice();
