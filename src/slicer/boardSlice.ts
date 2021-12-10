@@ -2,6 +2,8 @@ import {createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/t
 import {RootState} from '../app/store';
 import {BoardAction, BoardState, ChipAction, MoveAction, startBoard} from "./boardHelper";
 import {getPossibleMoves, moveStone, playerHasChipsOnField} from "./moveChipsHelper";
+import {setDiceRoll} from "./roundSlice";
+import {removeDiceUsed} from "./diceHelper";
 
 
 const initialState: BoardState = {
@@ -14,11 +16,12 @@ const initialState: BoardState = {
 export const handleClickOnField = createAsyncThunk<number | undefined, number, { state: RootState, dispatch: Dispatch }>(
     'fieldClickHandler',
     (fieldId, {getState, dispatch}) => {
-        const {selectedChip} = getState().board
+        const {selectedChip} = getState().board;
         if (selectedChip !== undefined && selectedChip !== fieldId) {
-            dispatch(updateBoard(moveStone(getState(), fieldId)))
-            dispatch(selectUnselect(selectedChip))
-            return undefined
+            dispatch(updateBoard(moveStone(getState(), fieldId)));
+            dispatch(setDiceRoll(removeDiceUsed(getState(), fieldId)))
+            dispatch(selectUnselect(selectedChip));
+            return undefined;
         }
         //if chips kicked out selected = kickedout
         //if selected get free fields, if free move
@@ -43,7 +46,10 @@ export const boardSlice = createSlice({
                 state.selectedChip = payload;
                 return
             }
-            if (state.selectedChip === payload) state.selectedChip = undefined;
+            if (state.selectedChip === payload) {
+                state.selectedChip = undefined;
+                state.possibleMoves = [];
+            }
         },
         setPossibleMoves: (state, {payload}: MoveAction) => {
             state.possibleMoves = payload;

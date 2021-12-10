@@ -16,7 +16,7 @@ const allChipsInHomeQuarter = ({board, round}: RootState): boolean => {
 
 const fieldIsFree = ({board, round}: RootState, fieldId: number): boolean => {
     if (!isOnBoard(fieldId) && !allChipsInHomeQuarter({board, round})) return false;
-    return  board.board[fieldId][round.enemyPlayer] <= 1;
+    return board.board[fieldId][round.enemyPlayer] <= 1;
 };
 
 export const getPossibleMoves = ({board, round}: RootState) => {
@@ -29,7 +29,6 @@ export const getPossibleMoves = ({board, round}: RootState) => {
         //@ts-ignore function returns when selected chip undefined
         if (fieldIsFree({board, round}, target)) moves.push(target)
     })
-
     const getNextMoves = (usedDie: number, index: number) => {
         const nextStep = usedDie + dice[index];
         //@ts-ignore function returns when selected chip undefined
@@ -58,7 +57,6 @@ export const moveStone = ({board, round}: RootState, fieldId: number): number[][
         removeChipFromField(board.selectedChip, round.activePlayer, currentBoard)
         addChipToField(fieldId, round.activePlayer, currentBoard);
     }
-    //add stone to new field
     //if enemy stone kick out
     //get dice used and take of roll
     //retunr updated board
