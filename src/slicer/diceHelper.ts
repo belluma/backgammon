@@ -1,6 +1,6 @@
 import {RootState} from "../app/store";
 
-export const removeDiceUsed = ({board, round}: RootState, fieldId: number) => {
+export const removeDiceUsed = ({ round}: RootState, fieldId: number) => {
     const dice = [...round.diceRoll];
     //@ts-ignore gets executed only after check for selectedChip
     const stepsTaken = Math.abs(fieldId - board.selectedChip)

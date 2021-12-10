@@ -5,7 +5,7 @@ import roundReducer from '../slicer/roundSlice'
 
 export const store = configureStore({
     reducer: {
-        board: boardReducer,
+        chips: boardReducer,
         round: roundReducer,
     },
 });
