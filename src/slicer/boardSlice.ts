@@ -21,7 +21,7 @@ export const handleClickOnField = createAsyncThunk<number | undefined, number, {
             dispatch(selectField(fieldId));
             //get possible moves
         }
-        getPossibleMoves(getState());
+        dispatch(setPossibleMoves(getPossibleMoves(getState())));
         return fieldId;
         // return fieldId;
     })
@@ -37,6 +37,9 @@ export const boardSlice = createSlice({
                 return
             }
             if (state.selectedChip === payload) state.selectedChip = undefined;
+        },
+        setPossibleMoves: (state, {payload}: PayloadAction<number[]>) => {
+            state.possibleMoves = payload;
         }
     },
     extraReducers: builder => {
@@ -48,8 +51,9 @@ export const boardSlice = createSlice({
     }
 });
 
-export const {selectField} = boardSlice.actions;
+export const {selectField, setPossibleMoves} = boardSlice.actions;
 
 export const selectedChip = (state: RootState) => state.board.selectedChip;
 export const selectBoard = (state: RootState) => state.board.board;
+export const selectPossibleMoves = (state: RootState) => state.board.possibleMoves;
 export default boardSlice.reducer;

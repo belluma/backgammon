@@ -2,10 +2,10 @@ import React from "react";
 import styles from "./Field.module.css";
 import Chip from "../Chip/Chip";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {handleClickOnField, selectedChip, selectField} from "../../slicer/boardSlice";
+import {handleClickOnField, selectedChip, selectField, selectPossibleMoves} from "../../slicer/boardSlice";
 
 type Props = {
-    className?: string;
+    className: string;
     chips: number[];
     top: boolean;
     index: number,
@@ -13,8 +13,10 @@ type Props = {
 
 const Field: React.FC<Props> & React.HTMLAttributes<HTMLDivElement> = (
     {className, chips, top, index}: Props) => {
-    const selected = useAppSelector(selectedChip);
     const dispatch = useAppDispatch();
+    const selected = useAppSelector(selectedChip);
+    const possibleMoves = useAppSelector(selectPossibleMoves)
+    const possibleTarget = possibleMoves.indexOf(index) >= 0 && "possible-target";
     const selectChip = () =>  {
         dispatch(handleClickOnField(index))
     }
@@ -30,7 +32,7 @@ const Field: React.FC<Props> & React.HTMLAttributes<HTMLDivElement> = (
             data-testid="Field"
             onClick={ selectChip}
         >
-            <div className={className}/>
+            <div className={`${className} ${possibleTarget}`}/>
             {chipStack}
         </section>
     );

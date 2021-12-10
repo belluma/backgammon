@@ -35,13 +35,13 @@ export const getPossibleMoves = ({board, round}: RootState) => {
     const getNextMoves = (usedDie: number, index: number) => {
         const nextStep = usedDie + dice[index];
         //@ts-ignore function returns when selected chip undefined
-        const target = board.selectedChip + nextStep;
+        const target = (round.activePlayer ? (nextStep * -1) : nextStep + board.selectedChip);
         //@ts-ignore function returns when selected chip undefined
-        if (fieldIsFree({board, round}, target) ) {
+        if (fieldIsFree({board, round}, target)) {
             moves.push(target)
-            if(index < dice.length - 1)getNextMoves(target, index + 1)
+            if (index < dice.length - 1) getNextMoves(target, index + 1)
         }
     }
     if (moves.length) getNextMoves(dice[0], 1)
-    console.log(moves)
+    return moves;
 }
