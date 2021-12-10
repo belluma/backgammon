@@ -20,29 +20,38 @@ const fieldIsFree = ({board, round}: RootState, fieldId: number): boolean => {
     if (!isOnBoard(fieldId) && !allChipsInHomeQuarter({board, round})) return false;
     return board.board[fieldId][round.enemyPlayer] <= 1;
 };
+const getBaseMoves = ({board, round}:RootState) => {
+    const {diceRoll, activePlayer} = round;
+    const {selectedChip} = board;
+    const moves: number[] = [];
+    if(selectedChip === undefined) return moves;
+    diceRoll.forEach(die => {
+        const target = (round.activePlayer ? (die * -1) : die) + selectedChip;
+        if(fieldIsFree({board, round}, target) && moves.indexOf(target) < 0) moves.push(target);
+    })
+    return moves;
+}
+const getNextMoves = ({board, round}:RootState, usedDie: number, index: number, moves :number[]= []):any => {
+    const {diceRoll, activePlayer} = round;
+    const {selectedChip} = board;
+    if(selectedChip === undefined) return;
+    const nextStep = usedDie + diceRoll[index];
+    const target = (activePlayer ? (nextStep * -1) : nextStep) + selectedChip;
+    if(fieldIsFree({board, round}, target)){
+        moves.push(target);
+        const usedDiceCombined = diceRoll.slice(0, index + 1).reduce((a, b) => a + b, 0)
+        if(index < diceRoll.length - 1)return  getNextMoves({board, round}, usedDiceCombined, index + 1, moves)
+    }
+    return moves
+}
 
 export const getPossibleMoves = ({board, round}: RootState, kickedOut = false) => {
-    const moves: number[] = [];
+    const moves: number[] = getBaseMoves({board,round});
     const dice = [...round.diceRoll];
-    if (board.selectedChip === undefined) return moves;
-    dice.forEach(die => {
-        //@ts-ignore function returns when selected chip undefined
-        const target = (round.activePlayer ? (die * -1) : die) + board.selectedChip
-        //@ts-ignore function returns when selected chip undefined
-        if (fieldIsFree({board, round}, target)) moves.push(target)
-    })
     if(kickedOut) return moves;
-    const getNextMoves = (usedDie: number, index: number) => {
-        const nextStep = usedDie + dice[index];
-        //@ts-ignore function returns when selected chip undefined
-        const target = (round.activePlayer ? (nextStep * -1) : nextStep) + board.selectedChip;
-        //@ts-ignore function returns when selected chip undefined
-        if (fieldIsFree({board, round}, target)) {
-            moves.push(target)
-            if (index < dice.length - 1) getNextMoves(target, index + 1)
-        }
+    if (moves.length) {
+        return [...moves, ...getNextMoves({board, round}, dice[0], 1)];
     }
-    if (moves.length) getNextMoves(dice[0], 1)
     return moves;
 }
 

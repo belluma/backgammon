@@ -16,11 +16,19 @@ const initialState: BoardState = {
 export const handleClickOnField = createAsyncThunk<number | undefined, number, { state: RootState, dispatch: Dispatch }>(
     'fieldClickHandler',
     (fieldId, {getState, dispatch}) => {
-        const {selectedChip} = getState().board;
+        const {selectedChip, possibleMoves} = getState().board;
+        const {activePlayer} = getState().round;
         if (selectedChip !== undefined && selectedChip !== fieldId) {
+            if(possibleMoves.indexOf(fieldId) === -1) return;
             dispatch(updateBoard(moveStone(dispatch, getState(), fieldId)));
             dispatch(setDiceRoll(removeDiceUsed(getState(), fieldId)))
             dispatch(selectUnselect(selectedChip));
+            if(getState().board.kickedChips[activePlayer] > 0) {
+                console.log('kickewd')
+                dispatch(selectUnselect(activePlayer ? 24 : -1));
+                dispatch(setPossibleMoves(getPossibleMoves(getState())));
+
+            }
             if (!getState().round.diceRoll.length) {
                 dispatch(swapPlayers())
             }
@@ -66,7 +74,6 @@ export const boardSlice = createSlice({
         }
     },
     extraReducers: builder => {
-
         builder
             .addCase(handleClickOnField.fulfilled, (state, {payload}: ChipAction) => {
             })
