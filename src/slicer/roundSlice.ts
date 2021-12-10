@@ -1,8 +1,9 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../app/store';
+import {RoundState} from "./roundHelper";
 
 
-const initialState = {
+const initialState:RoundState = {
     activePlayer: 0,
     enemyPlayer: 1,
     round: 0,

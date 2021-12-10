@@ -1,4 +1,6 @@
 import {RootState} from "../app/store";
+import {Dispatch} from "@reduxjs/toolkit";
+import {kickStone} from "./boardSlice";
 
 
 export const playerHasChipsOnField = ({round, board}: RootState, fieldId: number | undefined) => {
@@ -29,7 +31,6 @@ export const getPossibleMoves = ({board, round}: RootState) => {
         //@ts-ignore function returns when selected chip undefined
         if (fieldIsFree({board, round}, target)) moves.push(target)
     })
-
     const getNextMoves = (usedDie: number, index: number) => {
         const nextStep = usedDie + dice[index];
         //@ts-ignore function returns when selected chip undefined
@@ -40,7 +41,6 @@ export const getPossibleMoves = ({board, round}: RootState) => {
             if (index < dice.length - 1) getNextMoves(target, index + 1)
         }
     }
-    console.log(moves)
     if (moves.length) getNextMoves(dice[0], 1)
     return moves;
 }
@@ -51,13 +51,21 @@ const removeChipFromField = (fieldIndex: number, player: number, currentBoard: n
 const addChipToField = (fieldIndex: number, player: number, currentBoard: number[][]): void => {
     currentBoard[fieldIndex][player]++;
 };
+const kickEnemyStone = (dispatch:Dispatch, {board, round}:RootState, fieldId:number, currentBoard: number[][]): void => {
+    removeChipFromField(fieldId, round.enemyPlayer, currentBoard);
+    dispatch(kickStone(round.enemyPlayer));
+}
+const needToKickEnemy = ({board, round}:RootState, fieldId:number):boolean => {
+    return board.board[fieldId][round.enemyPlayer] === 1;
+}
 
-export const moveStone = ({board, round}: RootState, fieldId: number): number[][] => {
+export const moveStone = (dispatch: Dispatch, {board, round}: RootState, fieldId: number): number[][] => {
     const currentBoard = [...board.board.map(field => [...field])];
     if (board.possibleMoves.indexOf(fieldId) >= 0) {
         //@ts-ignore gets executed only after check for selectedChip
         removeChipFromField(board.selectedChip, round.activePlayer, currentBoard)
         addChipToField(fieldId, round.activePlayer, currentBoard);
+        if(needToKickEnemy({board, round}, fieldId)) kickEnemyStone(dispatch, {board, round}, fieldId, currentBoard);
     }
     //if enemy stone kick out
     //get dice used and take of roll

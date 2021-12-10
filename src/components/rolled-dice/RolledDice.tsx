@@ -20,7 +20,6 @@ function RolledDice(props: Props){
         const dice = rollDice();
         dispatch(setDiceRoll(dice));
     }
-    console.log(diceRoll.length)
     return(
         <section className="vertical-align" onClick={rollTheDice}>
             {diceRoll.map((die, i) => <Dice num={die} key={i}/>)}
