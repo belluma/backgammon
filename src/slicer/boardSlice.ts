@@ -3,10 +3,10 @@ import {RootState} from '../app/store';
 import {BoardAction, BoardState, ChipAction, MoveAction, PlayerAction, startBoard} from "./boardHelper";
 import {
     getPossibleMoves,
-    hasChipsKickedOut,
+    hasChipsKickedOut, moveAndUpdateDice,
     moveStone,
     noMovesPossible,
-    playerHasChipsOnField
+    playerHasChipsOnField, selectKickedOutStone
 } from "./moveChipsHelper";
 import {setDiceRoll, swapPlayers} from "./roundSlice";
 import {removeDiceUsed} from "./diceHelper";
@@ -25,19 +25,8 @@ const endRound = (dispatch: Dispatch) => {
     dispatch(swapPlayers());
 }
 
-const selectKickedOutStone = (state:RootState, dispatch:Dispatch) =>{
-    if (hasChipsKickedOut(state)) {
-        dispatch(selectUnselect(state.round.activePlayer ? 24 : -1));
-        dispatch(setPossibleMoves(getPossibleMoves(state)));
-    }
-}
-const moveAndUpdateDice = (state:RootState, dispatch:Dispatch, fieldId: number) => {
-    dispatch(updateBoard(moveStone(dispatch, state, fieldId)));
-    dispatch(setDiceRoll(removeDiceUsed(state, fieldId)))
-    dispatch(selectUnselect(state.chips.selectedChip));
-}
 
-export const handleClickOnField = createAsyncThunk<number | undefined, number, { state: RootState, dispatch: Dispatch }>(
+export const handleClickOnField = createAsyncThunk<void, number, { state: RootState, dispatch: Dispatch }>(
     'fieldClickHandler',
     (fieldId, {getState, dispatch}) => {
         const {selectedChip, possibleMoves} = getState().chips;
@@ -45,18 +34,10 @@ export const handleClickOnField = createAsyncThunk<number | undefined, number, {
             if (noMovesPossible(getState())) endRound(dispatch);
             if (possibleMoves.indexOf(fieldId) === -1) return;
             moveAndUpdateDice(getState(), dispatch, fieldId);
-            // dispatch(updateBoard(moveStone(dispatch, getState(), fieldId)));
-            // dispatch(setDiceRoll(removeDiceUsed(getState(), fieldId)))
-            // dispatch(selectUnselect(selectedChip));
-            // if (hasChipsKickedOut(getState())) {
-            //     dispatch(selectUnselect(activePlayer ? 24 : -1));
-            //     dispatch(setPossibleMoves(getPossibleMoves(getState())));
-            // }
             selectKickedOutStone(getState(), dispatch)
             if (!getState().round.diceRoll.length || noMovesPossible(getState())) {
                 endRound(dispatch);
             }
-            return undefined;
         }
         if (!getState().round.diceRoll.length) {
             //add feedback to user
@@ -65,26 +46,31 @@ export const handleClickOnField = createAsyncThunk<number | undefined, number, {
         if (noMovesPossible(getState())) endRound(dispatch);
         if (playerHasChipsOnField(getState(), fieldId)) {
             dispatch(selectUnselect(fieldId));
-
         }
         dispatch(setPossibleMoves(getPossibleMoves(getState())));
-        return fieldId;
     })
 
+
+const selectStone = (state:BoardState, payload: number | undefined) => {
+    if (state.selectedChip === undefined) {
+        state.selectedChip = payload;
+        return true
+    }
+}
+const unSelectStone = (state:BoardState, payload: number | undefined) => {
+    if (state.selectedChip === payload) {
+        state.selectedChip = undefined;
+        state.possibleMoves = [];
+    }
+}
 
 export const boardSlice = createSlice({
     name: 'board',
     initialState,
     reducers: {
         selectUnselect: (state, {payload}: ChipAction) => {
-            if (state.selectedChip === undefined) {
-                state.selectedChip = payload;
-                return
-            }
-            if (state.selectedChip === payload) {
-                state.selectedChip = undefined;
-                state.possibleMoves = [];
-            }
+           if(selectStone(state, payload)) return;
+           unSelectStone(state, payload)
         },
         unselectChip: (state) => {
             state.selectedChip = undefined;

@@ -1,6 +1,9 @@
 import {RootState} from "../app/store";
 import {current, Dispatch} from "@reduxjs/toolkit";
-import {kickStone, returnOnBoard, selectedChip} from "./boardSlice";
+import {kickStone, returnOnBoard, selectedChip, selectUnselect, setPossibleMoves, updateBoard} from "./boardSlice";
+import {setDiceRoll} from "./roundSlice";
+import {removeDiceUsed} from "./diceHelper";
+import {BoardState} from "./boardHelper";
 
 
 export const playerHasChipsOnField = ({chips, round}: RootState, fieldId: number | undefined) => {
@@ -107,4 +110,25 @@ export const moveStone = (dispatch: Dispatch, {chips, round}: RootState, fieldId
         if (needToKickEnemy({chips, round}, fieldId)) kickEnemyStone(dispatch, {chips, round}, fieldId, currentBoard);
     }
     return currentBoard;
+}
+
+// const stoneIsBlocked = ({selectedChip, possibleMoves}:BoardState) => {
+//     const stepsNeeded = selectedChip !== undefined ? Math.abs(selectedChip - possibleMoves[0]) : 0;
+//     if(stepsNeeded < Math.max)
+//
+//         }
+
+
+
+
+export const selectKickedOutStone = (state:RootState, dispatch:Dispatch) =>{
+    if (hasChipsKickedOut(state)) {
+        dispatch(selectUnselect(state.round.activePlayer ? 24 : -1));
+        dispatch(setPossibleMoves(getPossibleMoves(state)));
+    }
+}
+export const moveAndUpdateDice = (state:RootState, dispatch:Dispatch, fieldId: number) => {
+    dispatch(updateBoard(moveStone(dispatch, state, fieldId)));
+    dispatch(setDiceRoll(removeDiceUsed(state, fieldId)))
+    dispatch(selectUnselect(state.chips.selectedChip));
 }
