@@ -6,6 +6,7 @@ import RolledDice from "./components/rolled-dice/RolledDice";
 import {useAppDispatch, useAppSelector} from "./app/hooks";
 import {determineStartingPlayer} from "./helpers/helper";
 import {setDiceRoll, selectActivePlayer, swapPlayers} from "./slicer/roundSlice";
+import {selectBoard} from "./slicer/boardSlice";
 
 function App() {
     const dispatch = useAppDispatch();
@@ -16,8 +17,9 @@ function App() {
     }, []);
 
     const activePlayer = useAppSelector(selectActivePlayer);
+    const board = useAppSelector(selectBoard);
 
-    const {board, setBoard, resetBoard, kickedChips, setKickedChips} = useBoard();
+    const { setBoard, resetBoard, kickedChips, setKickedChips} = useBoard();
 
     const selectedChip = undefined;
     //moved
