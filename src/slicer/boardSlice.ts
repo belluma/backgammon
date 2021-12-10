@@ -16,12 +16,17 @@ const initialState: BoardState = {
 export const handleClickOnField = createAsyncThunk<number | undefined, number, { state: RootState, dispatch: Dispatch }>(
     'fieldClickHandler',
     (fieldId, {getState, dispatch}) => {
+        const {diceRoll} = getState().round
         const {selectedChip} = getState().board;
+        if(!diceRoll.length) {
+            //add feedback to user
+            return;
+        }
         if (selectedChip !== undefined && selectedChip !== fieldId) {
             dispatch(updateBoard(moveStone(getState(), fieldId)));
             dispatch(setDiceRoll(removeDiceUsed(getState(), fieldId)))
             dispatch(selectUnselect(selectedChip));
-            if(!getState().round.diceRoll.length) dispatch(swapPlayers())
+            if(!diceRoll.length) dispatch(swapPlayers())
             return undefined;
         }
         //if chips kicked out selected = kickedout
