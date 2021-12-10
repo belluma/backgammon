@@ -17,6 +17,7 @@ export const roundSlice = createSlice({
     reducers: {
         setDiceRoll: (state, {payload}: PayloadAction<number[]>) => {
             state.diceRoll = payload;
+            state.newRound = false;
         },
         swapPlayers: (state) => {
             [state.activePlayer, state.enemyPlayer] = [state.enemyPlayer, state.activePlayer];
