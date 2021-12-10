@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./Field.module.css";
 import Chip from "../Chip/Chip";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {selectedChip, selectField} from "../../slicer/boardSlice";
+import {handleClickOnField, selectedChip, selectField} from "../../slicer/boardSlice";
 
 type Props = {
     className?: string;
@@ -16,7 +16,7 @@ const Field: React.FC<Props> & React.HTMLAttributes<HTMLDivElement> = (
     const selected = useAppSelector(selectedChip);
     const dispatch = useAppDispatch();
     const selectChip = () =>  {
-        dispatch(selectField(index))
+        dispatch(handleClickOnField(index))
     }
     const amount = chips.reduce((a, b) => a + b);
     const getClassName = (i: number) => {

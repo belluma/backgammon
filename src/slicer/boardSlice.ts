@@ -8,11 +8,22 @@ const initialState: BoardState = {
     board: startBoard,
 }
 
-export const handleClickOnField = createAsyncThunk<number | undefined, void, {state:RootState, dispatch:Dispatch}>(
-    'fieldClickHandler',
-    (_, {getState, dispatch}) => {
+const playerHasChipsOnField = ({round, board}: RootState, fieldId: number | undefined) => {
+    if (!fieldId) return undefined
+    return board.board[fieldId][round.activePlayer] > 0;
+}
 
-    return 1;
+export const handleClickOnField = createAsyncThunk<number | undefined, number, { state: RootState, dispatch: Dispatch }>(
+    'fieldClickHandler',
+    (fieldId, {getState, dispatch}) => {
+//if chips kicked out selected = kickedout
+        //if selected get free fields, if free move
+        //if !selected select
+        if (playerHasChipsOnField(getState(), fieldId)) {
+            dispatch(selectField(fieldId));
+        }
+        return fieldId;
+        // return fieldId;
     })
 
 
@@ -29,10 +40,10 @@ export const boardSlice = createSlice({
         }
     },
     extraReducers: builder => {
-        const isPlayersChip = (state:BoardState, {payload}: ChipAction) => {}
+
         builder
-            .addCase(handleClickOnField.fulfilled, (state, {payload}:ChipAction) => {
-                state.selectedChip = payload;
+            .addCase(handleClickOnField.fulfilled, (state, {payload}: ChipAction) => {
+                console.log(payload)
             })
     }
 });
