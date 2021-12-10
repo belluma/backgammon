@@ -1,6 +1,6 @@
 import {RootState} from "../app/store";
 import {Dispatch} from "@reduxjs/toolkit";
-import {kickStone, returnOnBoard} from "./boardSlice";
+import {kickStone, returnOnBoard, selectedChip} from "./boardSlice";
 
 
 export const playerHasChipsOnField = ({chips, round}: RootState, fieldId: number | undefined) => {
@@ -53,10 +53,15 @@ export const getPossibleMoves = ({chips, round}: RootState, kickedOut = false) =
     }
     return moves;
 }
+export const hasChipsKickedOut = ({chips, round}:RootState) => chips.kickedChips[round.activePlayer] > 0;
+
 export const noMovesPossible = ({chips, round}: RootState) => {
     const {diceRoll, activePlayer} = round;
-    // const {board, kickedChips} = board;
-
+    const {board, kickedChips} = chips;
+    if(hasChipsKickedOut({chips, round})){
+        return !getPossibleMoves({chips:{...chips, selectedChip: activePlayer ? 24 : -1}, round}).length
+    }
+    return false;
 }
 const removeChipFromField = (dispatch:Dispatch, fieldIndex: number, player: 1 | 0, currentBoard: number[][]): void => {
     if(fieldIndex === -1 || fieldIndex === 24) {

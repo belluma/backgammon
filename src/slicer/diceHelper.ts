@@ -1,9 +1,9 @@
 import {RootState} from "../app/store";
 
-export const removeDiceUsed = ({ round}: RootState, fieldId: number) => {
+export const removeDiceUsed = ({chips,  round}: RootState, fieldId: number) => {
     const dice = [...round.diceRoll];
     //@ts-ignore gets executed only after check for selectedChip
-    const stepsTaken = Math.abs(fieldId - board.selectedChip)
+    const stepsTaken = Math.abs(fieldId - chips.selectedChip)
     const index = dice.indexOf(stepsTaken);
     if (index >= 0) dice.splice(index, 1);
     else {

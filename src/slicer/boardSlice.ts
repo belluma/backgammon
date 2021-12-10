@@ -1,7 +1,13 @@
 import {createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../app/store';
 import {BoardAction, BoardState, ChipAction, MoveAction, PlayerAction, startBoard} from "./boardHelper";
-import {getPossibleMoves, moveStone, playerHasChipsOnField} from "./moveChipsHelper";
+import {
+    getPossibleMoves,
+    hasChipsKickedOut,
+    moveStone,
+    noMovesPossible,
+    playerHasChipsOnField
+} from "./moveChipsHelper";
 import {setDiceRoll, swapPlayers} from "./roundSlice";
 import {removeDiceUsed} from "./diceHelper";
 
@@ -12,6 +18,12 @@ const initialState: BoardState = {
     possibleMoves: [],
     kickedChips: [0, 0]
 }
+const endRound = (dispatch: Dispatch) => {
+    dispatch(unselectChip());
+    dispatch(setPossibleMoves([]));
+    dispatch(setDiceRoll([]));
+    dispatch(swapPlayers());
+}
 
 export const handleClickOnField = createAsyncThunk<number | undefined, number, { state: RootState, dispatch: Dispatch }>(
     'fieldClickHandler',
@@ -19,16 +31,17 @@ export const handleClickOnField = createAsyncThunk<number | undefined, number, {
         const {selectedChip, possibleMoves} = getState().chips;
         const {activePlayer} = getState().round;
         if (selectedChip !== undefined && selectedChip !== fieldId) {
+            if(noMovesPossible(getState())) endRound(dispatch);
             if(possibleMoves.indexOf(fieldId) === -1) return;
             dispatch(updateBoard(moveStone(dispatch, getState(), fieldId)));
             dispatch(setDiceRoll(removeDiceUsed(getState(), fieldId)))
             dispatch(selectUnselect(selectedChip));
-            if(getState().chips.kickedChips[activePlayer] > 0) {
+            if(hasChipsKickedOut(getState())) {
                 dispatch(selectUnselect(activePlayer ? 24 : -1));
                 dispatch(setPossibleMoves(getPossibleMoves(getState())));
             }
-            if (!getState().round.diceRoll.length) {
-                dispatch(swapPlayers())
+            if (!getState().round.diceRoll.length || noMovesPossible(getState())) {
+                endRound(dispatch);
             }
             return undefined;
         }
@@ -58,6 +71,9 @@ export const boardSlice = createSlice({
                 state.possibleMoves = [];
             }
         },
+        unselectChip: (state) =>{
+            state.selectedChip = undefined;
+        },
         setPossibleMoves: (state, {payload}: MoveAction) => {
             state.possibleMoves = payload;
         },
@@ -78,7 +94,7 @@ export const boardSlice = createSlice({
     }
 });
 
-export const {selectUnselect, setPossibleMoves, updateBoard, kickStone, returnOnBoard} = boardSlice.actions;
+export const {selectUnselect,unselectChip, setPossibleMoves, updateBoard, kickStone, returnOnBoard} = boardSlice.actions;
 
 export const selectedChip = (state: RootState) => state.chips.selectedChip;
 export const selectBoard = (state: RootState) => state.chips.board;
