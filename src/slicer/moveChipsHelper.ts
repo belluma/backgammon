@@ -16,13 +16,10 @@ const allChipsInHomeQuarter = ({board, round}: RootState): boolean => {
 
 const fieldIsFree = ({board, round}: RootState, fieldId: number): boolean => {
     if (!isOnBoard(fieldId) && !allChipsInHomeQuarter({board, round})) return false;
-    return fieldId === -1 || fieldId === 24
-        ? true
-        : board.board[fieldId][round.enemyPlayer] <= 1;
+    return  board.board[fieldId][round.enemyPlayer] <= 1;
 };
 
 export const getPossibleMoves = ({board, round}: RootState) => {
-
     const moves: number[] = [];
     const dice = [...round.diceRoll];
     if (board.selectedChip === undefined) return moves;
@@ -30,12 +27,13 @@ export const getPossibleMoves = ({board, round}: RootState) => {
         //@ts-ignore function returns when selected chip undefined
         const target = (round.activePlayer ? (die * -1) : die) + board.selectedChip
         //@ts-ignore function returns when selected chip undefined
-        if (fieldIsFree({board, round}, target)) moves.push(board.selectedChip + die)
+        if (fieldIsFree({board, round}, target)) moves.push(target)
     })
+
     const getNextMoves = (usedDie: number, index: number) => {
         const nextStep = usedDie + dice[index];
         //@ts-ignore function returns when selected chip undefined
-        const target = (round.activePlayer ? (nextStep * -1) : nextStep + board.selectedChip);
+        const target = (round.activePlayer ? (nextStep * -1) : nextStep) + board.selectedChip;
         //@ts-ignore function returns when selected chip undefined
         if (fieldIsFree({board, round}, target)) {
             moves.push(target)
@@ -44,4 +42,26 @@ export const getPossibleMoves = ({board, round}: RootState) => {
     }
     if (moves.length) getNextMoves(dice[0], 1)
     return moves;
+}
+
+const removeChipFromField = (fieldIndex: number, player: number, currentBoard: number[][]): void => {
+    console.log(currentBoard[fieldIndex][player])
+    // currentBoard[fieldIndex][player]--;
+};
+const addChipToField = (fieldIndex: number, player: number, currentBoard: number[][]): void => {
+    // currentBoard[fieldIndex][player]++;
+};
+
+export const moveStone = ({board, round}: RootState, fieldId: number): number[][] => {
+    const currentBoard = [...board.board];
+    if (board.possibleMoves.indexOf(fieldId) >= 0) {
+        //@ts-ignore gets executed only after check for selectedChip
+        removeChipFromField(board.selectedChip, round.activePlayer, currentBoard)
+        addChipToField(fieldId, round.activePlayer, currentBoard);
+    }
+    //add stone to new field
+    //if enemy stone kick out
+    //get dice used and take of roll
+    //retunr updated board
+    return currentBoard;
 }

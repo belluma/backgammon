@@ -8,6 +8,8 @@ export interface BoardState {
 }
 
 export type ChipAction = PayloadAction<number | undefined>
+export type MoveAction = PayloadAction<number[]>
+export type BoardAction = PayloadAction<number[][]>
 
 const emptyBoard: number[][] = [...Array(24)].map((a) => [0, 0]);
 

@@ -1,7 +1,7 @@
 import {createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../app/store';
-import {BoardState, ChipAction, startBoard} from "./boardHelper";
-import {getPossibleMoves, playerHasChipsOnField} from "./moveChipsHelper";
+import {BoardAction, BoardState, ChipAction, MoveAction, startBoard} from "./boardHelper";
+import {getPossibleMoves, moveStone, playerHasChipsOnField} from "./moveChipsHelper";
 
 
 const initialState: BoardState = {
@@ -14,7 +14,12 @@ const initialState: BoardState = {
 export const handleClickOnField = createAsyncThunk<number | undefined, number, { state: RootState, dispatch: Dispatch }>(
     'fieldClickHandler',
     (fieldId, {getState, dispatch}) => {
-//if chips kicked out selected = kickedout
+        const {selectedChip} = getState().board
+        if (selectedChip !== undefined && selectedChip !== fieldId) {
+            dispatch(updateBoard(moveStone(getState(), fieldId)))
+            return undefined
+        }
+        //if chips kicked out selected = kickedout
         //if selected get free fields, if free move
         //if !selected select
         if (playerHasChipsOnField(getState(), fieldId)) {
@@ -31,15 +36,18 @@ export const boardSlice = createSlice({
     name: 'board',
     initialState,
     reducers: {
-        selectField: (state, {payload}: PayloadAction<number>) => {
+        selectField: (state, {payload}: ChipAction) => {
             if (state.selectedChip === undefined) {
                 state.selectedChip = payload;
                 return
             }
             if (state.selectedChip === payload) state.selectedChip = undefined;
         },
-        setPossibleMoves: (state, {payload}: PayloadAction<number[]>) => {
+        setPossibleMoves: (state, {payload}: MoveAction) => {
             state.possibleMoves = payload;
+        },
+        updateBoard: (state, {payload}: BoardAction) => {
+            state.board = payload;
         }
     },
     extraReducers: builder => {
@@ -51,7 +59,7 @@ export const boardSlice = createSlice({
     }
 });
 
-export const {selectField, setPossibleMoves} = boardSlice.actions;
+export const {selectField, setPossibleMoves, updateBoard} = boardSlice.actions;
 
 export const selectedChip = (state: RootState) => state.board.selectedChip;
 export const selectBoard = (state: RootState) => state.board.board;
