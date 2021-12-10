@@ -51,6 +51,7 @@ export const handleClickOnField = createAsyncThunk<number | undefined, number, {
         }
         if (playerHasChipsOnField(getState(), fieldId)) {
             dispatch(selectUnselect(fieldId));
+            if(noMovesPossible(getState())) endRound(dispatch);
         }
         dispatch(setPossibleMoves(getPossibleMoves(getState())));
         return fieldId;
