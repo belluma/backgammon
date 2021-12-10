@@ -3,6 +3,8 @@ import {PayloadAction} from "@reduxjs/toolkit";
 export interface BoardState {
     selectedChip: number | undefined,
     board: number[][],
+    possibleMoves: number[],
+    kickedChips: number[],
 }
 
 export type ChipAction = PayloadAction<number | undefined>

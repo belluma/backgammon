@@ -1,16 +1,14 @@
 import {createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../app/store';
 import {BoardState, ChipAction, startBoard} from "./boardHelper";
+import {getPossibleMoves, playerHasChipsOnField} from "./moveChipsHelper";
 
 
 const initialState: BoardState = {
     selectedChip: undefined,
     board: startBoard,
-}
-
-const playerHasChipsOnField = ({round, board}: RootState, fieldId: number | undefined) => {
-    if (!fieldId) return undefined
-    return board.board[fieldId][round.activePlayer] > 0;
+    possibleMoves: [],
+    kickedChips: [0, 0]
 }
 
 export const handleClickOnField = createAsyncThunk<number | undefined, number, { state: RootState, dispatch: Dispatch }>(
@@ -21,7 +19,9 @@ export const handleClickOnField = createAsyncThunk<number | undefined, number, {
         //if !selected select
         if (playerHasChipsOnField(getState(), fieldId)) {
             dispatch(selectField(fieldId));
+            //get possible moves
         }
+        getPossibleMoves(getState());
         return fieldId;
         // return fieldId;
     })
@@ -32,7 +32,7 @@ export const boardSlice = createSlice({
     initialState,
     reducers: {
         selectField: (state, {payload}: PayloadAction<number>) => {
-            if (!state.selectedChip) {
+            if (state.selectedChip === undefined) {
                 state.selectedChip = payload;
                 return
             }
