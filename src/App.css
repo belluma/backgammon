@@ -23,6 +23,10 @@
   border-top-color: rgb(39, 23, 4);
 }
 
+.possible-target{
+background-color:grey;
+}
+
 .chip-white {
   background-color: ivory;
 }
