@@ -7,6 +7,7 @@ import {setDiceRoll, selectActivePlayer, swapPlayers, hidePopper} from "./slicer
 import {handleClickOnField} from "./slicer/boardSlice";
 import {determineStartingPlayer} from "./slicer/diceHelper";
 import SwapPlayerPopper from "./components/swap-player-popper/SwapPlayerPopper";
+import {center} from "./helpers/styleHelper";
 
 function App() {
     const dispatch = useAppDispatch();
@@ -22,7 +23,7 @@ function App() {
     const activePlayer = useAppSelector(selectActivePlayer);
 
     return (
-        <section>
+        <section style={center}>
             <SwapPlayerPopper player={'test'} />
             <h1>It's your turn Player {activePlayer}</h1>
             <section className={"board"}>
