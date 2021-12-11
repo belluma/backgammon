@@ -1,8 +1,8 @@
 import {RootState} from "../app/store";
-import {current, Dispatch} from "@reduxjs/toolkit";
-import {kickStone, returnOnBoard, selectedChip, selectUnselect, setPossibleMoves, updateBoard} from "./boardSlice";
+import {Dispatch} from "@reduxjs/toolkit";
+import {kickStone, returnOnBoard, selectUnselect, setPossibleMoves, updateBoard} from "./boardSlice";
 import {setDiceRoll} from "./roundSlice";
-import {removeDiceUsed} from "./diceHelper";
+import {highestDieNeeded, oneDieExact, removeDiceUsed} from "./diceHelper";
 import {BoardState} from "./boardHelper";
 
 
@@ -11,14 +11,18 @@ export const playerHasChipsOnField = ({chips, round}: RootState, fieldId: number
     return chips.board[fieldId][round.activePlayer] > 0;
 }
 const isOnBoard = (fieldId: number): boolean => fieldId >= 0 && fieldId < 24;
-
 const allChipsInHomeQuarter = ({chips, round}: RootState): boolean => {
     const notHome =
         round.activePlayer === 0 ? chips.board.slice(0, 18) : chips.board.slice(6);
     if (chips.kickedChips[round.activePlayer] > 0) return false;
     return notHome.reduce((a, b) => a + b[round.activePlayer], 0) === 0;
 };
-const addExitToPossibleMoves = ({chips, round}: RootState, target: number, moves: number[]) => {
+const addJumpoutToPossibleMoves = ({chips, round}: RootState, target: number, moves: number[]) => {
+    const {selectedChip} = chips;
+    const {activePlayer, diceRoll} = round;
+    //@ts-ignore gets called only with selectedChip
+    const distanceToExit = activePlayer ? selectedChip + 1 : 24 - selectedChip
+    if (!oneDieExact(diceRoll, distanceToExit) && highestDieNeeded({chips, round}) > distanceToExit) return;
     if (allChipsInHomeQuarter({chips, round}) && target < 0 && moves.indexOf(-1) === -1) {
         moves.push(-1)
     }
@@ -26,9 +30,8 @@ const addExitToPossibleMoves = ({chips, round}: RootState, target: number, moves
         moves.push(24);
     }
 }
-
 const fieldIsFree = ({chips, round}: RootState, fieldId: number): boolean => {
-    if (!isOnBoard(fieldId) ) return false;
+    if (!isOnBoard(fieldId)) return false;
     return chips.board[fieldId][round.enemyPlayer] <= 1;
 };
 const getBaseMoves = ({chips, round}: RootState) => {
@@ -39,7 +42,7 @@ const getBaseMoves = ({chips, round}: RootState) => {
     diceRoll.forEach(die => {
         const target = (activePlayer ? (die * -1) : die) + selectedChip;
         if (fieldIsFree({chips, round}, target) && moves.indexOf(target) < 0) moves.push(target);
-        addExitToPossibleMoves({chips, round}, target, moves);
+        addJumpoutToPossibleMoves({chips, round}, target, moves);
     })
     return moves;
 }
@@ -65,8 +68,7 @@ export const getPossibleMoves = ({chips, round}: RootState, kickedOut = false) =
     }
     return moves;
 }
-export const hasChipsKickedOut = ({chips, round}: RootState) => chips.kickedChips[round.activePlayer] > 0;
-
+const hasChipsKickedOut = ({chips, round}: RootState) => chips.kickedChips[round.activePlayer] > 0;
 export const noMovesPossible = ({chips, round}: RootState) => {
     const {activePlayer} = round;
     const {board} = chips;
@@ -100,34 +102,43 @@ const needToKickEnemy = ({chips, round}: RootState, fieldId: number): boolean =>
     return chips.board[fieldId][round.enemyPlayer] === 1;
 }
 
-export const moveStone = (dispatch: Dispatch, {chips, round}: RootState, fieldId: number): number[][] => {
+const moveStone = (dispatch: Dispatch, {chips, round}: RootState, fieldId: number): number[][] => {
     const currentBoard = [...chips.board.map(field => [...field])];
     if (chips.possibleMoves.indexOf(fieldId) >= 0) {
         //@ts-ignore gets executed only after check for selectedChip
         removeChipFromField(dispatch, chips.selectedChip, round.activePlayer, currentBoard)
-        if(fieldId < 0 || fieldId > 23) return currentBoard
+        if (fieldId < 0 || fieldId > 23) return currentBoard
         addChipToField(fieldId, round.activePlayer, currentBoard);
         if (needToKickEnemy({chips, round}, fieldId)) kickEnemyStone(dispatch, {chips, round}, fieldId, currentBoard);
     }
     return currentBoard;
 }
 
-// const stoneIsBlocked = ({selectedChip, possibleMoves}:BoardState) => {
-//     const stepsNeeded = selectedChip !== undefined ? Math.abs(selectedChip - possibleMoves[0]) : 0;
-//     if(stepsNeeded < Math.max)
-//
-//         }
-
-
-
-
-export const selectKickedOutStone = (state:RootState, dispatch:Dispatch) =>{
+export const stoneIsBlocked = ({chips, round}: RootState, fieldId: number) => {
+    return !getPossibleMoves({
+        chips: {...chips, selectedChip: fieldId},
+        round
+    }).map(move => Math.abs(fieldId - move)).length;
+}
+export const selectStone = (state: BoardState, payload: number | undefined) => {
+    if (state.selectedChip === undefined) {
+        state.selectedChip = payload;
+        return true
+    }
+}
+export const unSelectStone = (state: BoardState, payload: number | undefined) => {
+    if (state.selectedChip === payload) {
+        state.selectedChip = undefined;
+        state.possibleMoves = [];
+    }
+}
+export const selectKickedOutStone = (state: RootState, dispatch: Dispatch) => {
     if (hasChipsKickedOut(state)) {
         dispatch(selectUnselect(state.round.activePlayer ? 24 : -1));
         dispatch(setPossibleMoves(getPossibleMoves(state)));
     }
 }
-export const moveAndUpdateDice = (state:RootState, dispatch:Dispatch, fieldId: number) => {
+export const moveAndUpdateDice = (state: RootState, dispatch: Dispatch, fieldId: number) => {
     dispatch(updateBoard(moveStone(dispatch, state, fieldId)));
     dispatch(setDiceRoll(removeDiceUsed(state, fieldId)))
     dispatch(selectUnselect(state.chips.selectedChip));

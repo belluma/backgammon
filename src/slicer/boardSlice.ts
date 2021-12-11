@@ -2,14 +2,12 @@ import {createAsyncThunk, createSlice, Dispatch} from '@reduxjs/toolkit';
 import {RootState} from '../app/store';
 import {BoardAction, BoardState, ChipAction, MoveAction, PlayerAction, startBoard} from "./boardHelper";
 import {
-    getPossibleMoves,
-    hasChipsKickedOut, moveAndUpdateDice,
-    moveStone,
+    getPossibleMoves
+    , moveAndUpdateDice,
     noMovesPossible,
-    playerHasChipsOnField, selectKickedOutStone
+    playerHasChipsOnField, selectKickedOutStone, selectStone, stoneIsBlocked, unSelectStone
 } from "./moveChipsHelper";
 import {setDiceRoll, swapPlayers} from "./roundSlice";
-import {removeDiceUsed} from "./diceHelper";
 
 
 const initialState: BoardState = {
@@ -24,7 +22,6 @@ const endRound = (dispatch: Dispatch) => {
     dispatch(setDiceRoll([]));
     dispatch(swapPlayers());
 }
-
 
 export const handleClickOnField = createAsyncThunk<void, number, { state: RootState, dispatch: Dispatch }>(
     'fieldClickHandler',
@@ -44,33 +41,20 @@ export const handleClickOnField = createAsyncThunk<void, number, { state: RootSt
             return;
         }
         if (noMovesPossible(getState())) endRound(dispatch);
-        if (playerHasChipsOnField(getState(), fieldId)) {
+        if (playerHasChipsOnField(getState(), fieldId) && !stoneIsBlocked(getState(), fieldId)) {
             dispatch(selectUnselect(fieldId));
         }
         dispatch(setPossibleMoves(getPossibleMoves(getState())));
     })
 
 
-const selectStone = (state:BoardState, payload: number | undefined) => {
-    if (state.selectedChip === undefined) {
-        state.selectedChip = payload;
-        return true
-    }
-}
-const unSelectStone = (state:BoardState, payload: number | undefined) => {
-    if (state.selectedChip === payload) {
-        state.selectedChip = undefined;
-        state.possibleMoves = [];
-    }
-}
-
 export const boardSlice = createSlice({
     name: 'board',
     initialState,
     reducers: {
         selectUnselect: (state, {payload}: ChipAction) => {
-           if(selectStone(state, payload)) return;
-           unSelectStone(state, payload)
+            if (selectStone(state, payload)) return;
+            unSelectStone(state, payload)
         },
         unselectChip: (state) => {
             state.selectedChip = undefined;
@@ -88,11 +72,6 @@ export const boardSlice = createSlice({
             state.kickedChips[payload]--;
         }
     },
-    // extraReducers: builder => {
-    //     builder
-    //         .addCase(handleClickOnField.fulfilled, (state, {payload}: ChipAction) => {
-    //         })
-    // }
 });
 
 export const {
