@@ -34,14 +34,17 @@ background-color:grey;
   background-color: brown;
 }
 .chip {
-  position: absolute;
-  top: 0;
-  left: 25px;
+
   border-radius: 100%;
   border-color: black;
   border-style: solid;
   width: 55px;
   height: 55px;
+}
+.chip-absolute{
+  position: absolute;
+  top: 0;
+  left: 25px;
 }
 .selected {
   opacity: 0.5 !important;

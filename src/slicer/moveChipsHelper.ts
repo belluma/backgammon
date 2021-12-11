@@ -125,6 +125,7 @@ export const selectStone = (state: BoardState, payload: number | undefined) => {
         state.selectedChip = payload;
         return true
     }
+    return false
 }
 export const unSelectStone = (state: BoardState, payload: number | undefined) => {
     if (state.selectedChip === payload) {
