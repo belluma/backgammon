@@ -1,8 +1,9 @@
-import { createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../app/store';
 import {PlayerNameAction, RoundState} from "./roundHelper";
-import {selectUnselect, setPossibleMoves} from "./boardSlice";
+import {selectUnselect, setPossibleMoves, updateBoard} from "./boardSlice";
 import {getPossibleMoves} from "./moveChipsHelper";
+import {PlayerAction, startBoard} from "./boardHelper";
 
 
 const initialState: RoundState = {
@@ -13,6 +14,7 @@ const initialState: RoundState = {
     showPopper: true,
     playerNames: ['player 1', 'player 2'],
     gameStarted: false,
+    gameEnd: false,
     points: [0, 0]
 }
 
@@ -32,10 +34,19 @@ export const rollDiceAndCheckForKickedStones = createAsyncThunk<void, number[], 
 const waitABit = () => {
     return new Promise<void>((r) => setTimeout(() => r(), 1000));
 }
+const finishRound = (winner: 1 | 0, dispatch:Dispatch) => {
+    dispatch(addPoints(winner))
+    dispatch(endGame())
+    dispatch(updateBoard(startBoard))
+}
 
-export const swapPlayers = createAsyncThunk<void, void, {}>(
+export const swapPlayers = createAsyncThunk<void, void, { state: RootState, dispatch: Dispatch }>(
     'swapPlayers',
-    async () => {
+    async (_, {getState, dispatch}) => {
+        const {chips, round} = getState();
+        if (!chips.board.reduce((a, b) => a + b[round.enemyPlayer], 0)) {
+            finishRound(round.enemyPlayer, dispatch)
+        }
         return await waitABit();
     }
 );
@@ -51,14 +62,20 @@ export const roundSlice = createSlice({
         beginRound: (state) => {
             state.newRound = false
         },
-        hidePopper:(state) => {
+        hidePopper: (state) => {
             state.showPopper = false;
         },
-        savePlayerName:(state, {payload}: PlayerNameAction) => {
+        savePlayerName: (state, {payload}: PlayerNameAction) => {
             state.playerNames[payload.player] = payload.name;
         },
-        startGame:(state) => {
+        startGame: (state) => {
             state.gameStarted = true;
+        },
+        endGame: state => {
+            state.gameEnd = true
+        },
+        addPoints: (state, {payload}: PlayerAction) => {
+            state.points[payload]++;
         }
     },
     extraReducers: builder => {
@@ -68,18 +85,21 @@ export const roundSlice = createSlice({
             state.showPopper = true;
         })
             .addCase(swapPlayers.fulfilled, state => {
-                state.showPopper = false
+                state.showPopper = false;
+                state.gameEnd = false;
             })
     }
 });
 
-export const {setDiceRoll, beginRound, hidePopper, savePlayerName, startGame} = roundSlice.actions;
+export const {setDiceRoll, beginRound, hidePopper, savePlayerName, startGame, endGame, addPoints} = roundSlice.actions;
 
 export default roundSlice.reducer;
-export const selectActivePlayer = (state: RootState) => (state.round.activePlayer)
-export const selectEnemyPlayer = (state: RootState) => (state.round.enemyPlayer)
-export const selectDiceRoll = (state: RootState) => (state.round.diceRoll)
-export const selectNewRound = (state: RootState) => (state.round.newRound)
-export const selectShowPopper = (state: RootState) => (state.round.showPopper)
-export const selectPlayerNames = (state: RootState) => (state.round.playerNames)
-export const selectGameStarted = (state: RootState) => (state.round.gameStarted)
+export const selectActivePlayer = (state: RootState) => (state.round.activePlayer);
+export const selectEnemyPlayer = (state: RootState) => (state.round.enemyPlayer);
+export const selectDiceRoll = (state: RootState) => (state.round.diceRoll);
+export const selectNewRound = (state: RootState) => (state.round.newRound);
+export const selectShowPopper = (state: RootState) => (state.round.showPopper);
+export const selectPlayerNames = (state: RootState) => (state.round.playerNames);
+export const selectGameStarted = (state: RootState) => (state.round.gameStarted);
+export const selectGameEnded = (state: RootState) => (state.round.gameEnd);
+export const selectPoints = (state: RootState) => (state.round.points);

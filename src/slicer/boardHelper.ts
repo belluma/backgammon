@@ -20,9 +20,13 @@ const chips = [
     {pos: 16, amount: 3},
     {pos: 18, amount: 5},
 ];
+const chips2 = [
+    {pos: 23, amount: 2},
+    {pos: 22, amount: 1},
+];
 export const startBoard = emptyBoard.map((field, i) => {
     const newField = [0, 0]
-    chips.forEach((a) => {
+    chips2.forEach((a) => {
         if (i === a.pos) newField[0] = a.amount;
         else if (23 - i === a.pos) newField[1] = a.amount;
     });

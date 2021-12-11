@@ -8,6 +8,7 @@ export interface RoundState{
     showPopper:boolean,
     playerNames: string[],
     gameStarted: boolean,
+    gameEnd: boolean,
     points: number[]
 }
 
