@@ -15,7 +15,7 @@ const Quarter = ({top,  id, className}: Props) => {
     const board = useAppSelector(selectBoard);
     const quarter = board.slice(id * 6, id * 6 + 6);
     const getClassName = (i: number) => {
-        const topColor = i % 2 ? 'red' : 'black';
+        const topColor = i % 2 ? 'black' : 'red';
         const bottomColor = i % 2 ? 'black' : 'red';
         return top ? `arrow-down ${topColor}` : `arrow-up ${bottomColor}`
     };
