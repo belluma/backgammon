@@ -12,7 +12,8 @@ const initialState: RoundState = {
     newRound: true,
     showPopper: true,
     playerNames: ['player 1', 'player 2'],
-    gameStarted: false
+    gameStarted: false,
+    points: [0, 0]
 }
 
 export const rollDiceAndCheckForKickedStones = createAsyncThunk<void, number[], { state: RootState, dispatch: Dispatch }>(
