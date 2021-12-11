@@ -28,7 +28,10 @@ export const handleClickOnField = createAsyncThunk<void, number, { state: RootSt
     (fieldId, {getState, dispatch}) => {
         const {selectedChip, possibleMoves} = getState().chips;
         if (selectedChip !== undefined && selectedChip !== fieldId) {
-            if (noMovesPossible(getState())) endRound(dispatch);
+            if (noMovesPossible(getState())) {
+                console.log(`it's your turn player ${getState().round.enemyPlayer}`)
+                endRound(dispatch);
+            }
             if (possibleMoves.indexOf(fieldId) === -1) return;
             moveAndUpdateDice(getState(), dispatch, fieldId);
             selectKickedOutStone(getState(), dispatch)
@@ -37,10 +40,13 @@ export const handleClickOnField = createAsyncThunk<void, number, { state: RootSt
             }
         }
         if (!getState().round.diceRoll.length) {
-            //add feedback to user
+         console.log(`it's your turn player ${getState().round.activePlayer}`)
             return;
         }
-        if (noMovesPossible(getState())) endRound(dispatch);
+        if (noMovesPossible(getState())) {
+            console.log(`it's your turn player ${getState().round.enemyPlayer}`)
+            endRound(dispatch);
+        }
         if (playerHasChipsOnField(getState(), fieldId) && !stoneIsBlocked(getState(), fieldId)) {
             dispatch(selectUnselect(fieldId));
         }

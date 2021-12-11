@@ -7,7 +7,7 @@ import {handleClickOnField, selectedChip,  selectPossibleMoves} from "../../slic
 type Props = {
     className: string;
     chips: number[];
-    top: boolean;
+    top?: boolean;
     index: number,
 };
 

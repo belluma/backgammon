@@ -1,17 +1,12 @@
 import React from 'react'
 import Dice from "../Dice/Dice";
-import {rollDice} from "../../helpers/helper";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {
     beginRound, rollDiceAndCheckForKickedStones,
     selectDiceRoll,
     selectNewRound,
-    setDiceRoll as setDiceRoll
 } from "../../slicer/roundSlice";
-
-//component imports
-
-//interface imports
+import {rollDice} from "../../slicer/diceHelper";
 
 type Props = {};
 

@@ -5,7 +5,7 @@ import {useAppSelector} from "../../app/hooks";
 import {selectKickedChips} from "../../slicer/boardSlice";
 
 type Props = {
-    top: boolean;
+    top?: boolean;
 };
 
 const Edge = ({top}: Props) => {
