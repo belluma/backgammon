@@ -75,7 +75,7 @@ export const boardSlice = createSlice({
         },
         returnOnBoard: (state, {payload}: PlayerAction) => {
             state.kickedChips[payload]--;
-        }
+        },
     },
 });
 

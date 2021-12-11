@@ -133,10 +133,11 @@ export const unSelectStone = (state: BoardState, payload: number | undefined) =>
         state.possibleMoves = [];
     }
 }
-export const selectKickedOutStone = (state: RootState, dispatch: Dispatch) => {
-    if (hasChipsKickedOut(state)) {
-        dispatch(selectUnselect(state.round.activePlayer ? 24 : -1));
-        dispatch(setPossibleMoves(getPossibleMoves(state)));
+export const selectKickedOutStone = ({chips,round}: RootState, dispatch: Dispatch) => {
+    if (hasChipsKickedOut({chips, round})) {
+        const kicked = round.activePlayer ? 24 : -1
+        dispatch(selectUnselect(kicked));
+        dispatch(setPossibleMoves(getPossibleMoves({chips:{...chips, selectedChip:kicked}, round})));
     }
 }
 export const moveAndUpdateDice = (state: RootState, dispatch: Dispatch, fieldId: number) => {

@@ -9,14 +9,14 @@ import {
     swapPlayers,
     hidePopper,
     selectGameStarted,
-    selectPlayerNames
 } from "./slicer/roundSlice";
 import {handleClickOnField} from "./slicer/boardSlice";
 import {determineStartingPlayer} from "./slicer/diceHelper";
 import SwapPlayerPopper from "./components/swap-player-popper/SwapPlayerPopper";
 import {center} from "./helpers/styleHelper";
 import NameInput from "./components/name-input/NameInput";
-import Chip from "./components/Chip/Chip";
+import CurrentPlayer from "./components/current-player/CurrentPlayer";
+import PointsCounter from "./components/points-counter/PointsCounter";
 
 function App() {
     const dispatch = useAppDispatch();
@@ -32,15 +32,14 @@ function App() {
         dispatch(handleClickOnField(activePlayer ? -1 : 24))
     }
     const activePlayer = useAppSelector(selectActivePlayer);
-    const playerNames = useAppSelector(selectPlayerNames);
 
     return (
         <section style={center}>
             <SwapPlayerPopper player={'test'}/>
             <NameInput/>
-            <section style={{display: 'flex'}}>
-                <h1 style={{paddingRight: 50}}>It's your turn Player {playerNames[activePlayer]}</h1>
-                <Chip position={1} className={`chip ${activePlayer ? "chip-black" : "chip-white"}`}/>
+            <section style={{display: 'flex', justifyContent:'space-between'}}>
+            <CurrentPlayer />
+            <PointsCounter />
             </section>
             <section className={"board"}>
                 <section style={{display: "inline-block"}}>
