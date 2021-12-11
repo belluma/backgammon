@@ -22,7 +22,7 @@ const Field: React.FC<Props> & React.HTMLAttributes<HTMLDivElement> = (
     }
     const amount = chips.reduce((a, b) => a + b);
     const getClassName = (i: number) => {
-        return ["chip", chips[0] > 0 ? "chip-white" : "chip-black", selected === index && i === amount - 1 && "selected"].join(' ');
+        return ["chip", "chip-absolute", chips[0] > 0 ? "chip-white" : "chip-black", selected === index && i === amount - 1 && "selected"].join(' ');
     }
     const chipStack = [...Array(amount)].map((_, i) => <Chip top={top} position={i} className={getClassName(i)}
                                                              key={i}/>)

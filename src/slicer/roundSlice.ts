@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../app/store';
-import {RoundState} from "./roundHelper";
+import {PlayerNameAction, RoundState} from "./roundHelper";
 import {selectUnselect, setPossibleMoves} from "./boardSlice";
 import {getPossibleMoves} from "./moveChipsHelper";
 
@@ -11,7 +11,8 @@ const initialState: RoundState = {
     diceRoll: [1, 1],
     newRound: true,
     showPopper: true,
-    playerNames: ['player 1', 'player 2']
+    playerNames: ['player 1', 'player 2'],
+    gameStarted: false
 }
 
 export const rollDiceAndCheckForKickedStones = createAsyncThunk<void, number[], { state: RootState, dispatch: Dispatch }>(
@@ -51,6 +52,12 @@ export const roundSlice = createSlice({
         },
         hidePopper:(state) => {
             state.showPopper = false;
+        },
+        savePlayerName:(state, {payload}: PlayerNameAction) => {
+            state.playerNames[payload.player] = payload.name;
+        },
+        startGame:(state) => {
+            state.gameStarted = true;
         }
     },
     extraReducers: builder => {
@@ -65,7 +72,7 @@ export const roundSlice = createSlice({
     }
 });
 
-export const {setDiceRoll, beginRound, hidePopper} = roundSlice.actions;
+export const {setDiceRoll, beginRound, hidePopper, savePlayerName, startGame} = roundSlice.actions;
 
 export default roundSlice.reducer;
 export const selectActivePlayer = (state: RootState) => (state.round.activePlayer)
@@ -74,3 +81,4 @@ export const selectDiceRoll = (state: RootState) => (state.round.diceRoll)
 export const selectNewRound = (state: RootState) => (state.round.newRound)
 export const selectShowPopper = (state: RootState) => (state.round.showPopper)
 export const selectPlayerNames = (state: RootState) => (state.round.playerNames)
+export const selectGameStarted = (state: RootState) => (state.round.gameStarted)

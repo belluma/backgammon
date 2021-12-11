@@ -3,10 +3,6 @@ import {useAppSelector} from "../../app/hooks";
 import {selectActivePlayer, selectPlayerNames, selectShowPopper} from "../../slicer/roundSlice";
 import {popperHidden, popperShown} from "../../helpers/styleHelper";
 
-//component imports
-
-//interface imports
-
 type Props = {
     player: string
 };
