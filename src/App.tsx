@@ -9,14 +9,12 @@ import {
     swapPlayers,
     hidePopper,
     selectGameStarted,
-    selectPlayerNames
 } from "./slicer/roundSlice";
 import {handleClickOnField} from "./slicer/boardSlice";
 import {determineStartingPlayer} from "./slicer/diceHelper";
 import SwapPlayerPopper from "./components/swap-player-popper/SwapPlayerPopper";
 import {center} from "./helpers/styleHelper";
 import NameInput from "./components/name-input/NameInput";
-import Chip from "./components/Chip/Chip";
 import CurrentPlayer from "./components/current-player/CurrentPlayer";
 import PointsCounter from "./components/points-counter/PointsCounter";
 

@@ -16,6 +16,7 @@ function NameInput(props: Props) {
     }
     const saveName = (e: SyntheticEvent) => {
         setPlayer(player + 1);
+        !player && setName(playerNames[1])
         dispatch(savePlayerName({player, name}))
         if (player) dispatch(startGame())
     }
