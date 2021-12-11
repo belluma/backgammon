@@ -1,6 +1,5 @@
 import React from "react";
 import Quarter from "../Quarter/Quarter";
-import SwapPlayerPopper from "../swap-player-popper/SwapPlayerPopper";
 
 type Props = {
     className?: string;

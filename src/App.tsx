@@ -16,7 +16,7 @@ function App() {
         const dice = determineStartingPlayer()
         dispatch(setDiceRoll(dice));
         if (dice[0] < dice[1]) dispatch(swapPlayers())
-    }, []);
+    }, [dispatch]);
     const jumpout = () => {
         dispatch(handleClickOnField(activePlayer ? -1 : 24))
     }

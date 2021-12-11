@@ -1,4 +1,4 @@
-import {AnyAction, createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, Dispatch, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../app/store';
 import {RoundState} from "./roundHelper";
 import {selectUnselect, setPossibleMoves} from "./boardSlice";
