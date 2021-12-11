@@ -20,6 +20,7 @@ const endRound = (dispatch: Dispatch) => {
     dispatch(unselectChip());
     dispatch(setPossibleMoves([]));
     dispatch(setDiceRoll([]));
+    // @ts-ignore
     dispatch(swapPlayers());
 }
 

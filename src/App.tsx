@@ -3,13 +3,15 @@ import "./App.css";
 import Board from "./components/Board/Board";
 import RolledDice from "./components/rolled-dice/RolledDice";
 import {useAppDispatch, useAppSelector} from "./app/hooks";
-import {setDiceRoll, selectActivePlayer, swapPlayers} from "./slicer/roundSlice";
+import {setDiceRoll, selectActivePlayer, swapPlayers, hidePopper} from "./slicer/roundSlice";
 import {handleClickOnField} from "./slicer/boardSlice";
 import {determineStartingPlayer} from "./slicer/diceHelper";
+import SwapPlayerPopper from "./components/swap-player-popper/SwapPlayerPopper";
 
 function App() {
     const dispatch = useAppDispatch();
     useEffect(() => {
+        dispatch(hidePopper());
         const dice = determineStartingPlayer()
         dispatch(setDiceRoll(dice));
         if (dice[0] < dice[1]) dispatch(swapPlayers())
@@ -21,6 +23,7 @@ function App() {
 
     return (
         <section>
+            <SwapPlayerPopper player={'test'} />
             <h1>It's your turn Player {activePlayer}</h1>
             <section className={"board"}>
                 <section style={{display: "inline-block"}}>
